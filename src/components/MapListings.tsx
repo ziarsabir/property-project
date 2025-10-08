@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import maplibregl, { Map, LngLatBoundsLike } from "maplibre-gl";
+import maplibregl, { Map, LngLatBoundsLike, StyleSpecification } from "maplibre-gl";
 import type { Listing } from "@/data/listings";
 import { fmtGBP } from "@/lib/format";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -23,12 +23,12 @@ function makePriceBadge(listing: Listing) {
 
 export type Bbox = { west: number; south: number; east: number; north: number };
 
-// Minimal inline style using OpenStreetMap raster tiles (no external style.json)
-const OSM_RASTER_STYLE = {
+// ✅ Properly typed OpenStreetMap raster style (no “any”)
+const OSM_RASTER_STYLE: StyleSpecification = {
   version: 8,
   sources: {
     osm: {
-      type: "raster" as const,
+      type: "raster",
       tiles: [
         "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
         "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -42,7 +42,7 @@ const OSM_RASTER_STYLE = {
   layers: [
     {
       id: "osm",
-      type: "raster" as const,
+      type: "raster",
       source: "osm",
       minzoom: 0,
       maxzoom: 19,
@@ -69,7 +69,10 @@ export default function MapListings({
 
   const boundsFromListings: LngLatBoundsLike | null = useMemo(() => {
     if (!listings?.length) return null;
-    let west = 180, south = 90, east = -180, north = -90;
+    let west = 180,
+      south = 90,
+      east = -180,
+      north = -90;
     for (const l of listings) {
       west = Math.min(west, l.lng);
       south = Math.min(south, l.lat);
@@ -87,7 +90,7 @@ export default function MapListings({
 
     const map = new maplibregl.Map({
       container: wrapRef.current,
-      style: OSM_RASTER_STYLE as any,
+      style: OSM_RASTER_STYLE, // ✅ no “as any”
       center: initialCenter,
       zoom: initialZoom,
       maxZoom: 19,

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link"; 
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,9 +25,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 function Header() {
   return (
     <header className="py-4 flex items-center justify-between border-b">
-      <a href="/" className="text-xl font-bold">Homefinder</a>
+      <Link href="/" className="text-xl font-bold">
+        Homefinder
+      </Link>
+
       <nav className="flex gap-4 text-sm">
-        <a href="/search" className="hover:underline">Search</a>
+        <Link href="/search" className="hover:underline">
+          Search
+        </Link>
         <span className="opacity-60">Sign in (later)</span>
       </nav>
     </header>
