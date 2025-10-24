@@ -90,7 +90,7 @@ export default function MapListings({
 
     const map = new maplibregl.Map({
       container: wrapRef.current,
-      style: OSM_RASTER_STYLE, // ✅ no “as any”
+      style: OSM_RASTER_STYLE, //  no “as any”
       center: initialCenter,
       zoom: initialZoom,
       maxZoom: 19,
