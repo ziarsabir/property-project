@@ -33,6 +33,9 @@ function Header() {
         <Link href="/search" className="hover:underline">
           Search
         </Link>
+		<Link href="/contact" className="hover:underline">
+		  Contact
+		</Link>
         <span className="opacity-60">Sign in (later)</span>
       </nav>
     </header>

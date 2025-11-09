@@ -13,6 +13,8 @@ export default function ListingPage({ params }: { params: { id: string } }) {
   const l = listings.find(x => x.id === params.id);
   if (!l) return notFound();
 
+
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "RealEstateListing",

@@ -1,0 +1,9 @@
+We have listing cards on homepage and we click on each listing card and that leads to a full listing page using params object. 
+Map to be on each listings page. 
+ Contact agentbutton to lead to contact info page 
+Search bar filter next to map is working fine - UseMemo 
+UseState will be used to store the data from the API 
+UseEffect will be used to ensure proper rendering and avoid errors 
+
+
+
