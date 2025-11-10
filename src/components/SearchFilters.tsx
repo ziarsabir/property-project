@@ -15,11 +15,17 @@ type SearchFiltersProps = {
   onFiltersChange: (filters: FilterState) => void;
 };
 
-export default function SearchFilters({ filters, onFiltersChange,}: SearchFiltersProps) {
+export default function SearchFilters({
+  filters,
+  onFiltersChange,
+}: SearchFiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Helper to update a single key in the filter state
-  const updateFilter = (key: keyof FilterState, value: any) => {
+  // ✅ Type-safe helper to update a single key in the filter state
+  const updateFilter = <K extends keyof FilterState>(
+    key: K,
+    value: FilterState[K]
+  ) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 
@@ -52,7 +58,7 @@ export default function SearchFilters({ filters, onFiltersChange,}: SearchFilter
               onChange={(e) =>
                 updateFilter(
                   "listingType",
-                  e.target.value ? e.target.value : undefined
+                  e.target.value ? (e.target.value as "SALE" | "RENT" | "") : ""
                 )
               }
               className="w-full border rounded px-3 py-2"
@@ -72,7 +78,7 @@ export default function SearchFilters({ filters, onFiltersChange,}: SearchFilter
               <input
                 type="number"
                 placeholder="Min price"
-                value={filters.priceMin ?? ""} // show "" if undefined
+                value={filters.priceMin ?? ""}
                 onChange={(e) =>
                   updateFilter(
                     "priceMin",
