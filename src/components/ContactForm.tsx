@@ -2,37 +2,60 @@
 
 import { useState } from "react";
 
+type ContactPayload = {
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+  honey?: string; // honeypot
+};
+
 export default function ContactForm() {
-  const [status, setStatus] = useState<"idle"|"loading"|"success"|"error">("idle");
+  const [status, setStatus] =
+    useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
- async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-  e.preventDefault();
-  setError(null);
-  setStatus("loading");
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setStatus("loading");
 
-  const form = e.currentTarget;              // <-- keep a stable ref
-  const data = new FormData(form);
-  const payload = Object.fromEntries(data.entries());
-  console.log("Form payload:", payload);
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    const entries = Object.fromEntries(data.entries());
 
-  try {
-    const res = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const json = await res.json();
-    if (!res.ok || !json.ok) throw new Error(json.error || "Something went wrong");
+    // Safely coerce to our payload type
+    const payload: ContactPayload = {
+      name: String(entries.name ?? ""),
+      email: String(entries.email ?? ""),
+      phone: entries.phone ? String(entries.phone) : undefined,
+      subject: entries.subject ? String(entries.subject) : undefined,
+      message: String(entries.message ?? ""),
+      honey: entries.honey ? String(entries.honey) : undefined,
+    };
 
-    setStatus("success");
-    form.reset();                            // <-- use the saved ref
-  } catch (err: any) {
-    setError(err.message || "Failed to send your message");
-    setStatus("error");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const json: { ok?: boolean; error?: string } = await res.json();
+      if (!res.ok || !json.ok) {
+        throw new Error(json.error || "Something went wrong");
+      }
+
+      setStatus("success");
+      form.reset();
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to send your message";
+      setError(message);
+      setStatus("error");
+    }
   }
-}
-
 
   return (
     <>
@@ -49,37 +72,85 @@ export default function ContactForm() {
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         {/* Honeypot (hidden) */}
-        <input type="text" name="honey" className="hidden" tabIndex={-1} autoComplete="off" />
+        <input
+          type="text"
+          name="honey"
+          className="hidden"
+          tabIndex={-1}
+          autoComplete="off"
+        />
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="name">Name</label>
-            <input required id="name" name="name" type="text" className="w-full rounded border px-3 py-2" />
+            <label className="block text-sm font-medium mb-1" htmlFor="name">
+              Name
+            </label>
+            <input
+              required
+              id="name"
+              name="name"
+              type="text"
+              className="w-full rounded border px-3 py-2"
+            />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="email">Email</label>
-            <input required id="email" name="email" type="email" className="w-full rounded border px-3 py-2" />
+            <label className="block text-sm font-medium mb-1" htmlFor="email">
+              Email
+            </label>
+            <input
+              required
+              id="email"
+              name="email"
+              type="email"
+              className="w-full rounded border px-3 py-2"
+            />
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="phone">Phone (optional)</label>
-            <input id="phone" name="phone" type="tel" className="w-full rounded border px-3 py-2" />
+            <label className="block text-sm font-medium mb-1" htmlFor="phone">
+              Phone (optional)
+            </label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              className="w-full rounded border px-3 py-2"
+            />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="subject">Subject (optional)</label>
-            <input id="subject" name="subject" type="text" className="w-full rounded border px-3 py-2" />
+            <label className="block text-sm font-medium mb-1" htmlFor="subject">
+              Subject (optional)
+            </label>
+            <input
+              id="subject"
+              name="subject"
+              type="text"
+              className="w-full rounded border px-3 py-2"
+            />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="message">Message</label>
-          <textarea required id="message" name="message" rows={6} className="w-full rounded border px-3 py-2" />
+          <label className="block text-sm font-medium mb-1" htmlFor="message">
+            Message
+          </label>
+          <textarea
+            required
+            id="message"
+            name="message"
+            rows={6}
+            className="w-full rounded border px-3 py-2"
+          />
         </div>
 
         <div className="flex items-center justify-end">
-          <button disabled={status === "loading"}  type="submit" className="rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-60">
+          <button
+            disabled={status === "loading"}
+            type="submit"
+            className="rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-60"
+          >
             {status === "loading" ? "Sending…" : "Send message"}
           </button>
         </div>
