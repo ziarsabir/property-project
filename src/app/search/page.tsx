@@ -16,6 +16,17 @@ function inBbox(lat: number, lng: number, bbox?: Bbox) {
   );
 }
 
+function isAbortError(err: unknown) {
+  // Works across browsers + Node/Next
+  if (err instanceof DOMException && err.name === "AbortError") return true;
+
+  if (typeof err === "object" && err !== null && "name" in err) {
+    return (err as { name?: unknown }).name === "AbortError";
+  }
+
+  return false;
+}
+
 export default function SearchPage() {
   const [q, setQ] = useState("");
   const [bbox, setBbox] = useState<Bbox | undefined>(undefined);
@@ -37,19 +48,18 @@ export default function SearchPage() {
           headers: { Accept: "application/json" },
         });
 
-        // If auth/middleware redirects this request, res.ok may still be true
-        // but content-type will be HTML. Guard against that.
+        // Guard against HTML responses (e.g. auth redirects)
         const contentType = res.headers.get("content-type") || "";
         if (!res.ok || !contentType.includes("application/json")) {
           setListings([]);
           return;
         }
 
-        const data = await res.json();
-        setListings(Array.isArray(data) ? data : []);
-      } catch (err) {
+        const data: unknown = await res.json();
+        setListings(Array.isArray(data) ? (data as Listing[]) : []);
+      } catch (err: unknown) {
         // Ignore abort errors on unmount
-        if ((err as any)?.name === "AbortError") return;
+        if (isAbortError(err)) return;
         setListings([]);
       } finally {
         setLoading(false);
