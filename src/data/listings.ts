@@ -1,7 +1,8 @@
+// src/data/listings.ts
 export type Listing = {
   id: string;
   title: string;
-  price: number;            // GBP
+  price: number; // GBP
   listingType: "SALE" | "RENT";
   beds: number;
   baths: number;
@@ -11,7 +12,7 @@ export type Listing = {
   lat: number;
   lng: number;
   photo?: string;
-  listedAt: string;         // ISO
+  listedAt: string; // ISO
 };
 
 export const listings: Listing[] = [
@@ -27,8 +28,9 @@ export const listings: Listing[] = [
     address: "12 Bayswater Rd, London",
     lat: 51.5115,
     lng: -0.1848,
-    photo: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
-    listedAt: "2025-09-20T10:00:00Z"
+    photo:
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=60",
+    listedAt: "2025-09-20T10:00:00Z",
   },
   {
     id: "l2",
@@ -42,8 +44,9 @@ export const listings: Listing[] = [
     address: "24 Lavender Hill, London",
     lat: 51.4647,
     lng: -0.1636,
-    photo: "https://images.unsplash.com/photo-1523217582562-09d0def993a6",
-    listedAt: "2025-09-18T09:00:00Z"
+    photo:
+      "https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&w=1600&q=60",
+    listedAt: "2025-09-18T09:00:00Z",
   },
   {
     id: "l3",
@@ -57,8 +60,9 @@ export const listings: Listing[] = [
     address: "3 Piccadilly, Manchester",
     lat: 53.4794,
     lng: -2.2453,
-    photo: "https://images.unsplash.com/photo-1493809842364-78817add7ffb",
-    listedAt: "2025-09-17T12:30:00Z"
+    photo:
+      "https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1600&q=60",
+    listedAt: "2025-09-17T12:30:00Z",
   },
   {
     id: "l4",
@@ -72,8 +76,10 @@ export const listings: Listing[] = [
     address: "10 Edgbaston Rd, Birmingham",
     lat: 52.4534,
     lng: -1.9341,
-    photo: "https://images.unsplash.com/photo-1572120360610-d971b9b78825",
-    listedAt: "2025-09-15T15:45:00Z"
+    // Birmingham (keep as-is)
+    photo:
+      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1600&q=60",
+    listedAt: "2025-09-15T15:45:00Z",
   },
   {
     id: "l5",
@@ -87,8 +93,9 @@ export const listings: Listing[] = [
     address: "22 Wellington St, Leeds",
     lat: 53.7974,
     lng: -1.5536,
-    photo: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae",
-    listedAt: "2025-09-14T11:00:00Z"
+    photo:
+      "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1600&q=60",
+    listedAt: "2025-09-14T11:00:00Z",
   },
   {
     id: "l6",
@@ -102,8 +109,10 @@ export const listings: Listing[] = [
     address: "7 High St, Edinburgh",
     lat: 55.9508,
     lng: -3.1903,
-    photo: "https://images.unsplash.com/photo-1568605114967-8130f3a36994",
-    listedAt: "2025-09-12T09:15:00Z"
+    // Edinburgh (changed so it's not the same as Birmingham)
+    photo:
+      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1600&q=60",
+    listedAt: "2025-09-12T09:15:00Z",
   },
   {
     id: "l7",
@@ -117,8 +126,9 @@ export const listings: Listing[] = [
     address: "45 The Strand, Liverpool",
     lat: 53.4034,
     lng: -2.9935,
-    photo: "https://images.unsplash.com/photo-1501183638710-841dd1904471",
-    listedAt: "2025-09-10T17:20:00Z"
+    photo:
+      "https://images.unsplash.com/photo-1501183638710-841dd1904471?auto=format&fit=crop&w=1600&q=60",
+    listedAt: "2025-09-10T17:20:00Z",
   },
   {
     id: "l8",
@@ -132,7 +142,8 @@ export const listings: Listing[] = [
     address: "14 Royal York Crescent, Bristol",
     lat: 51.4545,
     lng: -2.6204,
-    photo: "https://images.unsplash.com/photo-1502005097973-6a7082348e28",
-    listedAt: "2025-09-08T13:00:00Z"
-  }
+    photo:
+      "https://images.unsplash.com/photo-1502005097973-6a7082348e28?auto=format&fit=crop&w=1600&q=60",
+    listedAt: "2025-09-08T13:00:00Z",
+  },
 ];

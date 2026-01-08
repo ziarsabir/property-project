@@ -21,7 +21,7 @@ export default function SearchFilters({
 }: SearchFiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // ✅ Type-safe helper to update a single key in the filter state
+  // Type-safe helper to update a single key in the filter state
   const updateFilter = <K extends keyof FilterState>(
     key: K,
     value: FilterState[K]

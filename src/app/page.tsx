@@ -2,7 +2,7 @@ import { listings } from "@/data/listings";
 import ListingCard from "@/components/ListingCard";
 
 export default function HomePage() {
-  const latest = listings.slice(0, 6);
+  const latest = listings.slice(0, 4);
   return (
     <div>
       <section className="py-8">

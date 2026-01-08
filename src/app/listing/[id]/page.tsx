@@ -2,61 +2,56 @@ import { listings } from "@/data/listings";
 import Image from "next/image";
 import { fmtGBP } from "@/lib/format";
 import { notFound } from "next/navigation";
-import Link from "next/link"; // Added import
+import EnquiryBox from "@/components/EnquiryBox";
 
 export async function generateStaticParams() {
-  return listings.map(l => ({ id: l.id }));
+  return listings.map((l) => ({ id: l.id }));
 }
 
 export const revalidate = 60;
 
-export default function ListingPage({ params }: { params: { id: string } }) {
-  const l = listings.find(x => x.id === params.id);
+export default async function ListingPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  const l = listings.find((x) => x.id === id);
   if (!l) return notFound();
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "RealEstateListing",
-    "name": l.title,
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": l.city,
-      "postalCode": l.postcode,
-      "streetAddress": l.address
-    },
-    "offers": { "@type": "Offer", "price": l.price, "priceCurrency": "GBP" }
-  };
-
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <article className="grid md:grid-cols-2 gap-6">
-        <div className="relative w-full h-80 bg-slate-100 rounded-md overflow-hidden">
-          {l.photo && <Image src={l.photo} alt={l.title} fill className="object-cover" />}
+    <article className="grid gap-6 lg:grid-cols-2">
+      <section>
+        <div className="relative h-80 w-full overflow-hidden rounded-xl bg-slate-100">
+          {l.photo ? (
+            <Image
+              src={l.photo}
+              alt={l.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
+            />
+          ) : null}
         </div>
-        <div>
-          <h1 className="text-2xl font-bold">{l.title}</h1>
-          <p className="text-slate-600 mt-1">{l.address}</p>
-          <div className="mt-3 text-lg font-semibold">
-            {fmtGBP(l.price)}{l.listingType === "RENT" ? " pcm" : ""}
-          </div>
-          <div className="mt-2 text-sm">
-            {l.beds} bed • {l.baths} bath • {l.city} {l.postcode}
-          </div>
-          <div className="mt-6">
-            {/* Updated button to link to contact page */}
-            <Link
-              href="/contact"
-              className="inline-block px-4 py-2 rounded bg-slate-900 text-white hover:bg-slate-800 transition"
-            >
-              Contact us
-            </Link>
-          </div>
+
+        <h1 className="mt-4 text-2xl font-bold">{l.title}</h1>
+        <p className="mt-1 text-slate-600">{l.address}</p>
+
+        <div className="mt-3 text-lg font-semibold">
+          {fmtGBP(l.price)}
+          {l.listingType === "RENT" ? " pcm" : ""}
         </div>
-      </article>
-    </>
+
+        <div className="mt-2 text-sm text-slate-700">
+          {l.beds} bed • {l.baths} bath • {l.city} {l.postcode}
+        </div>
+      </section>
+
+      <aside className="lg:sticky lg:top-6 h-fit">
+        <EnquiryBox subject={`Enquiry about: ${l.title} (${l.id})`} />
+      </aside>
+    </article>
   );
 }
