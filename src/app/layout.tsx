@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link"; 
+import Link from "next/link";
 import "./globals.css";
+import Providers from "./providers"; // 👈 ADD THIS
 
 export const metadata: Metadata = {
   title: "Homefinder (dev)",
@@ -12,11 +13,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen bg-white text-slate-900">
-        <div className="max-w-7xl mx-auto px-4">
-          <Header />
-          <main className="py-6">{children}</main>
-          <Footer />
-        </div>
+        {/* 👇 WRAP EVERYTHING IN PROVIDERS */}
+        <Providers>
+          <div className="max-w-5xl mx-auto px-4">
+            <Header />
+            <main className="py-6">{children}</main>
+            <Footer />
+          </div>
+        </Providers>
       </body>
     </html>
   );
@@ -29,14 +33,21 @@ function Header() {
         Homefinder
       </Link>
 
-      <nav className="flex gap-4 text-sm">
+      <nav className="flex gap-4 text-sm items-center">
         <Link href="/search" className="hover:underline">
           Search
         </Link>
-		<Link href="/contact" className="hover:underline">
-		  Contact
-		</Link>
-        <span className="opacity-60">Sign in (later)</span>
+
+        <Link href="/contact" className="hover:underline">
+          Contact
+        </Link>
+
+        <Link
+          href="/signin"
+          className="rounded-md border px-3 py-1 font-medium hover:bg-slate-100 transition"
+        >
+          Sign in
+        </Link>
       </nav>
     </header>
   );
