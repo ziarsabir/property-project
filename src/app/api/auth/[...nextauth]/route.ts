@@ -2,24 +2,33 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const nextAuthSecret = process.env.NEXTAUTH_SECRET;
+
+if (!googleClientId || !googleClientSecret) {
+  throw new Error("Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET");
+}
+
+if (!nextAuthSecret) {
+  throw new Error("Missing NEXTAUTH_SECRET");
+}
+
 const handler = NextAuth({
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
     }),
   ],
 
-  // Use your custom sign-in page
   pages: {
     signIn: "/signin",
   },
 
-  // Required in production and recommended in dev
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: nextAuthSecret,
 
   callbacks: {
-    // Prevent open-redirect issues + keep users on your domain
     async redirect({ url, baseUrl }) {
       if (url.startsWith("/")) return `${baseUrl}${url}`;
       if (new URL(url).origin === baseUrl) return url;
