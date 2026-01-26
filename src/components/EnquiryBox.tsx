@@ -42,6 +42,7 @@ export default function EnquiryBox({ subject }: { subject: string }) {
       });
 
       const json: { ok?: boolean; error?: string } = await res.json();
+
       if (!res.ok || !json.ok)
         throw new Error(json.error || "Something went wrong");
 
@@ -49,9 +50,7 @@ export default function EnquiryBox({ subject }: { subject: string }) {
       setError(null);
       form.reset();
     } catch (err: unknown) {
-      setError(
-        err instanceof Error ? err.message : "Failed to send your message"
-      );
+      setError(err instanceof Error ? err.message : "Failed to send your message");
       setStatus("error");
     }
   }

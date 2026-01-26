@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     ].join("\n");
 
     // IMPORTANT:
-    // Use Resend's default sender until you set up a domain.
+    // Use Resend's default sender until I set up a domain.
     // This "from" MUST be either onboarding@resend.dev (default)
     // or an email on a verified domain.
     const from = "Homefinder <onboarding@resend.dev>";

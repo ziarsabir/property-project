@@ -43,6 +43,7 @@ export default function ContactForm() {
       });
 
       const json: { ok?: boolean; error?: string } = await res.json();
+      
       if (!res.ok || !json.ok) {
         throw new Error(json.error || "Something went wrong");
       }
