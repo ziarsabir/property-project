@@ -3,6 +3,7 @@ import Image from "next/image";
 import { fmtGBP } from "@/lib/format";
 import { notFound } from "next/navigation";
 import EnquiryBox from "@/components/EnquiryBox";
+import SavePropertyButton from "@/components/SavePropertyButton";
 
 export async function generateStaticParams() {
   return listings.map((l) => ({ id: l.id }));
@@ -42,6 +43,11 @@ export default async function ListingPage({
         <div className="mt-3 text-lg font-semibold">
           {fmtGBP(l.price)}
           {l.listingType === "RENT" ? " pcm" : ""}
+        </div>
+
+        {/* Save button (Client Component) - sends this listing's id to /api/saved */}
+        <div className="mt-4">
+          <SavePropertyButton listingId={l.id}/>
         </div>
 
         <div className="mt-2 text-sm text-slate-700">
