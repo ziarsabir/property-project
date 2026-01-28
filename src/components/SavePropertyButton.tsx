@@ -3,7 +3,7 @@
 import { useState } from "react"; 
 
 export default function SavePropertyButton({ listingId }: { listingId: string }) {
-
+    // Track a user-facing message (success or error)
     // message will hold a text like "Saved!"
     // null means "show nothing"
     const [message, setMessage] = useState<string | null>(null); 
@@ -17,8 +17,16 @@ export default function SavePropertyButton({ listingId }: { listingId: string })
 
     const data = await res.json();
     console.log("API response:", data);
-    setMessage("Saved!"); 
+    // If the API responded with a 2xx status, show success 
+    if (res.ok) {
+        setMessage("Saved!"); 
+    } else {
+        // Otherwise show the error returned from the backend 
+        setMessage(data?.error || "Something went wrong"); 
+    }
   }
+
+  ////click → fetch → backend responds → setState → UI updates
 
   return (
     <div>
