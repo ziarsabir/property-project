@@ -1,6 +1,12 @@
 "use client";
 
+import { useState } from "react"; 
+
 export default function SavePropertyButton({ listingId }: { listingId: string }) {
+
+    // message will hold a text like "Saved!"
+    // null means "show nothing"
+    const [message, setMessage] = useState<string | null>(null); 
   
     async function handleSave() {
     const res = await fetch("/api/saved", {
@@ -11,19 +17,23 @@ export default function SavePropertyButton({ listingId }: { listingId: string })
 
     const data = await res.json();
     console.log("API response:", data);
+    setMessage("Saved!"); 
   }
 
   return (
-    <button
-      onClick={handleSave}
-      style={{
-        padding: "10px 14px",
-        background: "black",
-        color: "white",
-        borderRadius: 8,
-      }}
-    >
-      Save Property
-    </button>
+    <div>
+        <button
+        onClick={handleSave}
+        style={{
+            padding: "10px 14px",
+            background: "black",
+            color: "white",
+            borderRadius: 8,
+        }}
+        >
+        Save Property
+        </button>
+        {message && <p>{message}</p>}
+    </div>
   );
 }
