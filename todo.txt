@@ -1,9 +1,40 @@
-We have listing cards on homepage and we click on each listing card and that leads to a full listing page using params object. 
-Map to be on each listings page. 
- Contact agentbutton to lead to contact info page 
-Search bar filter next to map is working fine - UseMemo 
-UseState will be used to store the data from the API 
-UseEffect will be used to ensure proper rendering and avoid errors 
+HOMEFINDER NEXT STEPS
 
+COMPLETED
 
+[x] Property search page
+[x] Property cards
+[x] Property details page
+[x] Google authentication
+[x] Contact page
+[x] Enquiry form
+[x] Resend email integration
+[x] Map integration
+[x] Sign in page
+
+NEXT FEATURES
+
+[ ] Add Sign Out button to navbar
+[ ] Show Sign In only when logged out
+[ ] Create Saved Properties page
+[ ] Connect Save Property button to database
+[ ] Display saved properties for logged-in users
+[ ] Move listings into MySQL database
+[ ] Retrieve listings from database instead of listings.ts
+
+Resend is currently working using the default onboarding@resend.dev sender. 
+Property enquiry emails are successfully arriving in my personal Gmail inbox. 
+Future improvement: verify a custom domain in Resend so emails can be sent from a professional Homefinder/domain-based email address.
+
+QUESTIONS
+
+1. Should Saved Properties be my next feature?
+
+2. Should I build the Saved Properties page before moving listings into MySQL?
+
+3. What database structure would you recommend?
+
+4. What would make this project look stronger to freelance clients?
+
+5. Do I need an SQL database? 
 

@@ -1,36 +1,182 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Homefinder
 
-## Getting Started
+Homefinder is a full-stack property search application built with Next.js, TypeScript and Tailwind CSS.
 
-First, run the development server:
+Users can browse property listings, search using filters and an interactive map, view property details, submit enquiries and sign in using Google authentication.
+
+---
+
+## Features
+
+### Property Search
+
+- Search available properties
+- Filter by:
+  - Property type (Sale / Rent)
+  - Minimum bedrooms
+  - Minimum bathrooms
+  - Price range
+- Interactive map powered by MapLibre and OpenStreetMap
+
+### Property Listings
+
+- Responsive property cards
+- Dynamic property detail pages
+- Property images and pricing
+- Property location information
+
+### Property Enquiries
+
+- Contact form
+- Property enquiry form
+- Email delivery using Resend
+- Honeypot spam protection
+- Success and error feedback messages
+
+### Authentication
+
+- Google Sign In
+- Google Sign Out
+- Session management with NextAuth
+
+### Saved Properties
+
+- Save Property button
+- API endpoint created
+- Currently returns successful responses
+- Database storage planned for future implementation
+
+---
+
+## Tech Stack
+
+### Frontend
+
+- Next.js 15
+- React
+- TypeScript
+- Tailwind CSS
+
+### Authentication
+
+- NextAuth
+- Google OAuth
+
+### Maps
+
+- MapLibre GL
+- OpenStreetMap
+
+### Email Service
+
+- Resend
+
+### Backend
+
+- Next.js API Routes
+
+---
+
+## Environment Variables
+
+The application requires the following environment variables:
+
+```env
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+NEXTAUTH_SECRET=
+
+RESEND_API_KEY=
+CONTACT_TO_EMAIL=
+```
+
+### Variable Purpose
+
+| Variable | Purpose |
+|-----------|-----------|
+| GOOGLE_CLIENT_ID | Google OAuth authentication |
+| GOOGLE_CLIENT_SECRET | Google OAuth authentication |
+| NEXTAUTH_SECRET | Encrypts authentication sessions |
+| RESEND_API_KEY | Sends contact and enquiry emails |
+| CONTACT_TO_EMAIL | Email address that receives enquiries |
+
+---
+
+## Running the Project
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Current Status
 
-To learn more about Next.js, take a look at the following resources:
+### Completed
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+✅ Property search page
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+✅ Property detail pages
 
-## Deploy on Vercel
+✅ Interactive map integration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+✅ Search filters
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+✅ Contact page
+
+✅ Property enquiry system
+
+✅ Resend email integration
+
+✅ Google authentication
+
+✅ Sign In / Sign Out functionality
+
+✅ Responsive UI
+
+### In Progress
+
+🚧 Saved Properties functionality
+
+### Planned Improvements
+
+- Store saved properties in MySQL
+- Connect Save Property button to database
+- Create Saved Properties page
+- Display saved properties for authenticated users
+- Move property data from hardcoded listings into MySQL
+- Improve authenticated user experience
+- Deploy production version to cloud infrastructure
+- Implement CI/CD workflow
+
+---
+
+## What I Learned
+
+This project helped me develop experience with:
+
+- React state management
+- TypeScript
+- Next.js App Router
+- API routes
+- OAuth authentication
+- Form handling
+- Email integrations
+- Interactive maps
+- Responsive design
+- Component-based architecture
+- Full-stack web development
