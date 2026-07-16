@@ -25,6 +25,7 @@ if (!demoUserEmail || !demoUserPasswordHash) {
   );
 }
 
+// Instantiating my NextAuth object - defining everything within the object 
 const handler = NextAuth({
   providers: [
     GoogleProvider({
