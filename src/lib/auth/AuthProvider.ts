@@ -1,5 +1,19 @@
-// This is the parent class. It says that every child auth class must provide a createProvider() method. 
+// src/lib/auth/AuthProvider.ts
 
-export abstract class AuthProvider {
-  abstract createProvider(): unknown;
+/**
+ * Parent authentication class.
+ *
+ * Every authentication provider in the application should inherit
+ * from this class and implement createProvider().
+ *
+ * This gives each provider a common structure while allowing
+ * different authentication methods (Google, Credentials, etc.)
+ * to have their own implementation.
+ */
+
+export abstract class AuthProvider<TProvider> {
+  /**
+   * Each child class must return its configured NextAuth provider.
+   */
+  abstract createProvider(): TProvider;
 }

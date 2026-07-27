@@ -1,8 +1,15 @@
-// src/app/api/auth/[...nextauth]/route.ts
+/**
+ * route.ts assembles the overall NextAuth configuration.
+ *
+ * Each authentication provider is responsible for creating and
+ * configuring its own provider implementation. route.ts creates
+ * instances of each provider, calls createProvider() on them,
+ * and passes the configured providers into NextAuth.
+ */
+
 import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { compare } from "bcryptjs";
+import { GoogleAuthProvider } from "@/lib/auth/GoogleAuthProvider";
+import { CredentialsAuthProvider } from "@/lib/auth/CredentialsAuthProvider";
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -25,57 +32,20 @@ if (!demoUserEmail || !demoUserPasswordHash) {
   );
 }
 
-// Instantiating my NextAuth object - defining everything within the object 
+const googleAuthProvider = new GoogleAuthProvider(
+  googleClientId,
+  googleClientSecret
+);
+
+const credentialsAuthProvider = new CredentialsAuthProvider(
+  demoUserEmail,
+  demoUserPasswordHash
+);
+
 const handler = NextAuth({
   providers: [
-    GoogleProvider({
-      clientId: googleClientId,
-      clientSecret: googleClientSecret,
-    }),
-
-    CredentialsProvider({
-      name: "Email and password",
-
-      credentials: {
-        email: {
-          label: "Email",
-          type: "email",
-          placeholder: "test@example.com",
-        },
-        password: {
-          label: "Password",
-          type: "password",
-        },
-      },
-
-      async authorize(credentials) {
-        const email = credentials?.email?.trim().toLowerCase();
-        const password = credentials?.password;
-
-        if (!email || !password) {
-          return null;
-        }
-
-        if (email !== demoUserEmail.toLowerCase()) {
-          return null;
-        }
-
-        const passwordMatches = await compare(
-          password,
-          demoUserPasswordHash
-        );
-
-        if (!passwordMatches) {
-          return null;
-        }
-
-        return {
-          id: "demo-user-1",
-          name: "Demo User",
-          email: demoUserEmail,
-        };
-      },
-    }),
+    googleAuthProvider.createProvider(),
+    credentialsAuthProvider.createProvider(),
   ],
 
   session: {
@@ -90,8 +60,14 @@ const handler = NextAuth({
 
   callbacks: {
     async redirect({ url, baseUrl }) {
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      if (new URL(url).origin === baseUrl) return url;
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+
+      if (new URL(url).origin === baseUrl) {
+        return url;
+      }
+
       return baseUrl;
     },
   },
