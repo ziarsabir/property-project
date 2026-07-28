@@ -12,7 +12,7 @@ export type Listing = {
   lat: number;
   lng: number;
   photo?: string;
-  listedAt: string; // ISO
+  listedAt: string; 
 };
 
 export const listings: Listing[] = [
