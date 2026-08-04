@@ -2,22 +2,12 @@
 
 import { useMemo, useState, useEffect } from "react";
 import ListingCard, { ListingCardSkeleton } from "@/components/ListingCard";
-import MapListings, { type Bbox } from "@/components/MapListings";
 import SearchFilters, { type FilterState } from "@/components/SearchFilters";
 import type { Listing } from "@/data/listings";
+import { Property } from "@/models/Property";
 
-function inBbox(lat: number, lng: number, bbox?: Bbox) {
-  if (!bbox) return true;
-  return (
-    lng >= bbox.west &&
-    lng <= bbox.east &&
-    lat >= bbox.south &&
-    lat <= bbox.north
-  );
-}
 
 function isAbortError(err: unknown) {
-  // Works across browsers + Node/Next
   if (err instanceof DOMException && err.name === "AbortError") return true;
 
   if (typeof err === "object" && err !== null && "name" in err) {
@@ -29,12 +19,13 @@ function isAbortError(err: unknown) {
 
 export default function SearchPage() {
   const [q, setQ] = useState("");
-  const [bbox, setBbox] = useState<Bbox | undefined>(undefined);
   const [filters, setFilters] = useState<FilterState>({});
 
-  const [listings, setListings] = useState<Listing[]>([]);
+  // Store Property objects rather than raw Listing objects
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch the latest listings from the backend when the page first loads
   useEffect(() => {
     const controller = new AbortController();
 
@@ -45,22 +36,44 @@ export default function SearchPage() {
         const res = await fetch("/api/listings", {
           cache: "no-store",
           signal: controller.signal,
-          headers: { Accept: "application/json" },
+          headers: {
+            Accept: "application/json",
+          },
         });
 
-        // Guard against HTML responses (e.g. auth redirects)
-        const contentType = res.headers.get("content-type") || "";
+        const contentType = res.headers.get("content-type") ?? "";
+
         if (!res.ok || !contentType.includes("application/json")) {
-          setListings([]);
+          setProperties([]);
           return;
         }
 
         const data: unknown = await res.json();
-        setListings(Array.isArray(data) ? (data as Listing[]) : []);
+
+        // Defensive programming - ensure the API returned an array
+        if (!Array.isArray(data)) {
+          setProperties([]);
+          return;
+        }
+
+        const rawListings = data as Listing[];
+
+        // Convert raw Listing objects into richer Property objects
+        const propertyObjects = rawListings.map((listing) =>
+          Property.fromListing(listing)
+        );
+
+        setProperties(propertyObjects);
+
+        // Temporary check that the Property methods are available
+        console.log(
+          "First property is for sale:",
+          propertyObjects[0]?.isForSale()
+        );
       } catch (err: unknown) {
-        // Ignore abort errors on unmount
         if (isAbortError(err)) return;
-        setListings([]);
+
+        setProperties([]);
       } finally {
         setLoading(false);
       }
@@ -70,27 +83,41 @@ export default function SearchPage() {
   }, []);
 
   const filtered = useMemo(() => {
-    return listings.filter((l) => {
+    return properties.filter((property) => {
       const matchQ = q
-        ? (l.city + " " + l.postcode + " " + l.title)
+        ? (
+            property.city +
+            " " +
+            property.postcode +
+            " " +
+            property.title
+          )
             .toLowerCase()
             .includes(q.toLowerCase())
-        : true;
-
-      const matchMap = inBbox(l.lat, l.lng, bbox);
+      : true;
 
       const matchType = filters.listingType
-        ? l.listingType === filters.listingType
+        ? property.listingType === filters.listingType
         : true;
 
-      const matchMin = filters.priceMin ? l.price >= filters.priceMin : true;
-      const matchMax = filters.priceMax ? l.price <= filters.priceMax : true;
-      const matchBeds = filters.beds ? l.beds >= filters.beds : true;
-      const matchBaths = filters.baths ? l.baths >= filters.baths : true;
+      const matchMin = filters.priceMin
+        ? property.price >= filters.priceMin
+        : true;
+
+      const matchMax = filters.priceMax
+        ? property.price <= filters.priceMax
+        : true;
+
+      const matchBeds = filters.beds
+        ? property.beds >= filters.beds
+        : true;
+
+      const matchBaths = filters.baths
+        ? property.baths >= filters.baths
+        : true;
 
       return (
         matchQ &&
-        matchMap &&
         matchType &&
         matchMin &&
         matchMax &&
@@ -98,13 +125,12 @@ export default function SearchPage() {
         matchBaths
       );
     });
-  }, [listings, q, bbox, filters]);
+  }, [properties, q, filters]);
 
-  const visibleList = filtered.length ? filtered : listings;
+ const visibleProperties = filtered;
 
   return (
     <div className="grid gap-6 md:grid-cols-[1fr_420px] lg:grid-cols-[1fr_520px]">
-      {/* LEFT */}
       <section className="space-y-3">
         <input
           className="border rounded px-3 py-2 w-full"
@@ -113,12 +139,15 @@ export default function SearchPage() {
           onChange={(e) => setQ(e.target.value)}
         />
 
-        <SearchFilters filters={filters} onFiltersChange={setFilters} />
+        <SearchFilters
+          filters={filters}
+          onFiltersChange={setFilters}
+        />
 
         <div className="text-xs text-slate-500">
           {loading
             ? "Loading..."
-            : `Showing ${filtered.length} of ${listings.length}`}
+            : `Showing ${filtered.length} of ${properties.length}`}
         </div>
 
         <div className="grid gap-3">
@@ -126,8 +155,13 @@ export default function SearchPage() {
             Array.from({ length: 8 }).map((_, i) => (
               <ListingCardSkeleton key={i} />
             ))
-          ) : visibleList.length ? (
-            visibleList.map((l) => <ListingCard key={l.id} l={l} />)
+          ) : visibleProperties.length ? (
+            visibleProperties.map((property) => (
+              <ListingCard
+                key={property.id}
+                l={property}
+              />
+            ))
           ) : (
             <div className="rounded-lg border bg-white p-6 text-sm text-slate-600">
               No results found. Try adjusting your filters.
@@ -136,10 +170,9 @@ export default function SearchPage() {
         </div>
       </section>
 
-      {/* RIGHT */}
       <aside className="lg:sticky lg:top-6 h-fit">
         <div className="border rounded-lg bg-slate-50 overflow-hidden h-[520px] lg:h-[calc(100vh-140px)]">
-          <MapListings listings={visibleList} onMoveBbox={setBbox} />
+         
         </div>
       </aside>
     </div>

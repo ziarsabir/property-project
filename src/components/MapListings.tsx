@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import maplibregl, { Map, LngLatBoundsLike, StyleSpecification } from "maplibre-gl";
-import type { Listing } from "@/data/listings";
+import type { Property } from "@/models/Property";
 import { fmtGBP } from "@/lib/format";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-function makePriceBadge(listing: Listing) {
+function makePriceBadge(listing: Property) {
   const el = document.createElement("div");
   el.style.padding = "4px 8px";
   el.style.borderRadius = "9999px";
@@ -56,7 +56,7 @@ export default function MapListings({
   initialCenter = [-0.1276, 51.5072], // London
   initialZoom = 9,
 }: {
-  listings: Listing[];
+  listings: Property[];
   onMoveBbox?: (bbox: Bbox) => void;
   initialCenter?: [number, number];
   initialZoom?: number;

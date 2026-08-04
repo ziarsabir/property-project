@@ -1,11 +1,11 @@
 // src/components/ListingCard.tsx
 import Link from "next/link";
 import Image from "next/image";
-import type { Listing } from "@/data/listings";
+import type { Property } from "@/models/Property";
 import { fmtGBP } from "@/lib/format";
 
 type ListingCardProps = {
-  l: Listing;
+  l: Property;
 };
 
 export function ListingCardSkeleton() {
