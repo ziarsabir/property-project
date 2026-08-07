@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
-import Providers from "./providers"; // 👈 ADD THIS
+import Providers from "./providers";
+import AuthControls from "@/components/AuthControls";
 
 export const metadata: Metadata = {
   title: "Homefinder (dev)",
@@ -42,12 +43,7 @@ function Header() {
           Contact
         </Link>
 
-        <Link
-          href="/signin"
-          className="rounded-md border px-3 py-1 font-medium hover:bg-slate-100 transition"
-        >
-          Sign in
-        </Link>
+        <AuthControls />
       </nav>
     </header>
   );
