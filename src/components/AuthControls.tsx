@@ -1,3 +1,5 @@
+"use client"; 
+
 /**
  * AuthControls displays the correct authentication option
  * based on the user's current session.
@@ -8,8 +10,6 @@
  * This is a Client Component because it uses NextAuth's
  * useSession() hook (which tells the component whether the user is currently signed in) and signOut() function.
  */
-
-"use client"; 
 
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";

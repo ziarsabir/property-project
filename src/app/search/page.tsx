@@ -5,6 +5,7 @@ import ListingCard, { ListingCardSkeleton } from "@/components/ListingCard";
 import SearchFilters, { type FilterState } from "@/components/SearchFilters";
 import type { Listing } from "@/data/listings";
 import { Property } from "@/models/Property";
+import MapListings from "@/components/MapListings"; 
 
 
 function isAbortError(err: unknown) {
@@ -65,11 +66,6 @@ export default function SearchPage() {
 
         setProperties(propertyObjects);
 
-        // Temporary check that the Property methods are available
-        console.log(
-          "First property is for sale:",
-          propertyObjects[0]?.isForSale()
-        );
       } catch (err: unknown) {
         if (isAbortError(err)) return;
 
@@ -168,13 +164,15 @@ export default function SearchPage() {
             </div>
           )}
         </div>
+        
+        <aside className="lg:sticky lg:top-6 h-fit">
+          <div className="border rounded-lg bg-slate-50 overflow-hidden h-[520px] lg:h-[calc(100vh-140px)]">
+            <MapListings listings={visibleProperties} />
+          </div>
+        </aside>
+
       </section>
 
-      <aside className="lg:sticky lg:top-6 h-fit">
-        <div className="border rounded-lg bg-slate-50 overflow-hidden h-[520px] lg:h-[calc(100vh-140px)]">
-         
-        </div>
-      </aside>
     </div>
   );
 }

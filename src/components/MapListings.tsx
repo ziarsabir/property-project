@@ -1,29 +1,40 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import maplibregl, { Map, LngLatBoundsLike, StyleSpecification } from "maplibre-gl";
+/**
+ * MapListings displays the currently filtered properties on an interactive map.
+ *
+ * The map is created once when the component loads. Whenever the filtered
+ * properties change, their markers are updated and the map moves to show them.
+ * After that, the user can freely zoom and pan without changing the filters
+ * or causing the map to reset itself.
+ */
+
+import { useEffect, useRef } from "react";
+import maplibregl, { Map, StyleSpecification } from "maplibre-gl";
 import type { Property } from "@/models/Property";
 import { fmtGBP } from "@/lib/format";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-function makePriceBadge(listing: Property) {
+function makePriceBadge(property: Property) {
   const el = document.createElement("div");
+
   el.style.padding = "4px 8px";
   el.style.borderRadius = "9999px";
-  el.style.background = "#111827"; // slate-900
+  el.style.background = "#111827";
   el.style.color = "white";
   el.style.fontSize = "12px";
   el.style.fontWeight = "700";
   el.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
   el.style.transform = "translate(-50%, -50%)";
   el.style.whiteSpace = "nowrap";
-  el.textContent = `${fmtGBP(listing.price)}${listing.listingType === "RENT" ? " pcm" : ""}`;
+
+  el.textContent = `${fmtGBP(property.price)}${
+    property.listingType === "RENT" ? " pcm" : ""
+  }`;
+
   return el;
 }
 
-export type Bbox = { west: number; south: number; east: number; north: number };
-
-// ✅ Properly typed OpenStreetMap raster style (no “any”)
 const OSM_RASTER_STYLE: StyleSpecification = {
   version: 8,
   sources: {
@@ -52,106 +63,92 @@ const OSM_RASTER_STYLE: StyleSpecification = {
 
 export default function MapListings({
   listings,
-  onMoveBbox,
-  initialCenter = [-0.1276, 51.5072], // London
+  initialCenter = [-0.1276, 51.5072],
   initialZoom = 9,
 }: {
   listings: Property[];
-  onMoveBbox?: (bbox: Bbox) => void;
   initialCenter?: [number, number];
   initialZoom?: number;
 }) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
-  const programmaticMoveRef = useRef(false);
-  const hasEmittedInitialRef = useRef(false);
 
-  const boundsFromListings: LngLatBoundsLike | null = useMemo(() => {
-    if (!listings?.length) return null;
-    let west = 180,
-      south = 90,
-      east = -180,
-      north = -90;
-    for (const l of listings) {
-      west = Math.min(west, l.lng);
-      south = Math.min(south, l.lat);
-      east = Math.max(east, l.lng);
-      north = Math.max(north, l.lat);
-    }
-    if (west === east && south === north) {
-      return [west - 0.01, south - 0.01, east + 0.01, north + 0.01];
-    }
-    return [west, south, east, north];
-  }, [listings]);
-
+  // Create the map once when the component mounts
   useEffect(() => {
     if (!wrapRef.current || mapRef.current) return;
 
     const map = new maplibregl.Map({
       container: wrapRef.current,
-      style: OSM_RASTER_STYLE, //  no “as any”
+      style: OSM_RASTER_STYLE,
       center: initialCenter,
       zoom: initialZoom,
       maxZoom: 19,
     });
+
     mapRef.current = map;
 
-    map.once("load", () => {
-      if (!hasEmittedInitialRef.current) {
-        const b = map.getBounds();
-        onMoveBbox?.({
-          west: b.getWest(),
-          south: b.getSouth(),
-          east: b.getEast(),
-          north: b.getNorth(),
-        });
-        hasEmittedInitialRef.current = true;
-      }
-    });
-
-    map.on("moveend", () => {
-      if (programmaticMoveRef.current) {
-        programmaticMoveRef.current = false;
-        return;
-      }
-      const b = map.getBounds();
-      onMoveBbox?.({
-        west: b.getWest(),
-        south: b.getSouth(),
-        east: b.getEast(),
-        north: b.getNorth(),
-      });
-    });
-
     return () => {
-      markersRef.current.forEach((m) => m.remove());
+      markersRef.current.forEach((marker) => marker.remove());
       map.remove();
       mapRef.current = null;
     };
-  }, [initialCenter, initialZoom, onMoveBbox]);
+  }, [initialCenter, initialZoom]);
 
+  // Update markers and frame the map whenever the filtered properties change
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !boundsFromListings) return;
-    programmaticMoveRef.current = true;
-    map.fitBounds(boundsFromListings, { padding: 40, duration: 300 });
-  }, [boundsFromListings]);
 
-  useEffect(() => {
-    const map = mapRef.current;
     if (!map) return;
-    markersRef.current.forEach((m) => m.remove());
+
+    // Remove the old markers
+    markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
-    for (const l of listings) {
-      const marker = new maplibregl.Marker({ element: makePriceBadge(l), anchor: "center" })
-        .setLngLat([l.lng, l.lat])
+
+    // Add markers for the currently visible properties
+    for (const property of listings) {
+      const marker = new maplibregl.Marker({
+        element: makePriceBadge(property),
+        anchor: "center",
+      })
+        .setLngLat([property.lng, property.lat])
         .addTo(map);
+
       marker.getElement().addEventListener("click", () => {
-        window.location.href = `/listing/${l.id}`;
+        window.location.href = `/listing/${property.id}`;
       });
+
       markersRef.current.push(marker);
     }
+
+    // No properties means there is nothing for the map to frame
+    if (listings.length === 0) return;
+
+    // If only one property matches, centre the map on that property
+    if (listings.length === 1) {
+      const property = listings[0];
+
+      map.flyTo({
+        center: [property.lng, property.lat],
+        zoom: 14,
+        duration: 500,
+      });
+
+      return;
+    }
+
+    // If multiple properties match, calculate bounds that contain all of them
+    const bounds = new maplibregl.LngLatBounds();
+
+    for (const property of listings) {
+      bounds.extend([property.lng, property.lat]);
+    }
+
+    map.fitBounds(bounds, {
+      padding: 50,
+      duration: 500,
+      maxZoom: 14,
+    });
   }, [listings]);
 
   return (
