@@ -108,7 +108,7 @@ export default function ProfilePage() {
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">
-            Keep track of the properties you're interested in.
+            Keep track of the properties you&apos;re interested in.
           </p>
         </div>
 
@@ -123,7 +123,7 @@ export default function ProfilePage() {
           </h3>
 
           <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-            Save properties that catch your eye and they'll appear here for
+            Save properties that catch your eye and they&apos;ll appear here for
             easy access later.
           </p>
 
