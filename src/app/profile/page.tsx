@@ -135,6 +135,51 @@ export default function ProfilePage() {
           </Link>
         </div>
       </section>
+
+      {/*
+        YOUR ENQUIRIES
+
+        This section will eventually display property enquiries made by
+        the authenticated user.
+
+        The contact route currently sends enquiries through Resend but
+        does not persist enquiry history, so for now this section displays
+        an empty state rather than temporary or hard-coded enquiry data.
+      */}
+      <section className="rounded-xl border bg-white p-6 shadow-sm">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-slate-900">
+            Your enquiries
+          </h2>
+
+          <p className="mt-1 text-sm text-slate-500">
+            Keep track of the properties you&apos;ve enquired about.
+          </p>
+        </div>
+
+        {/* Empty state shown when there is no persisted enquiry history */}
+        <div className="py-10 text-center">
+          <div className="text-3xl" aria-hidden="true">
+            ✉
+          </div>
+
+          <h3 className="mt-3 text-base font-semibold text-slate-900">
+            No enquiries yet
+          </h3>
+
+          <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+            When you enquire about a property, your enquiry history can appear
+            here for easy access.
+          </p>
+
+          <Link
+            href="/search"
+            className="mt-5 inline-flex rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+          >
+            Search properties
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

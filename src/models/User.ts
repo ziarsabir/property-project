@@ -78,7 +78,7 @@ export class User {
   // Removes a property from the user's saved properties
   removeSavedProperty(propertyId: string): void {
     // Create a new saved properties array without the matching property ID
-    // filter() doesn't remove an item from the existing array. It returns a brand new array containing only the elements that satisfy the condition. That's why you assign the result back to: this.SavedPropertyIds
+    // filter() doesn't remove an item from the existing array. It returns a brand new array containing only the elements that satisfy the condition. That's why I assign the result back to: this.SavedPropertyIds
     this.savedPropertyIds = this.savedPropertyIds.filter(
       (savedPropertyId) => savedPropertyId !== propertyId
     );
