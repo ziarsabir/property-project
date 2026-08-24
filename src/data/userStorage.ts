@@ -65,7 +65,7 @@ function toUser(storedUser: StoredUser): User {
 
 // Read the persisted users from users.json
 // This function is asynchronous because readFile() returns a Promise.
-// async allows us to use await to wait for the file-reading operation to complete. In the meantime Node can continue handling other work. 
+// async allows me to use await to wait for the file-reading operation to complete. In the meantime Node can continue handling other work. 
 // Promise<StoredUser[]> means this async function eventually returns an array of stored user records
 export async function readUsers(): Promise<StoredUser[]> {
   // Read the contents of users.json as JSON-formatted text 
