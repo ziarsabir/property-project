@@ -6,7 +6,7 @@ import { saveUser, loadUsers, updateUser } from "@/data/userStorage";
  * Temporary API route used to test the user persistence pipeline.
  *
  * This creates a real User domain object and passes it to saveUser()
- * so we can confirm that the user's data is persisted to users.json.
+ * so I can confirm that the user's data is persisted to users.json.
  *
  * This route is only for development/testing and will be removed
  * once the persistence pipeline has been confirmed to work.
@@ -31,7 +31,7 @@ export async function GET() {
   // Load the persisted records and reconstruct them as User domain objects
   const users = await loadUsers();
 
-  // Get the Test User that we previously persisted
+  // Get the Test User that I previously persisted
   const loadedUser = users.find((user) => user.id === "test-user-1");
 
   // Prove that the loaded user is a real User domain object
