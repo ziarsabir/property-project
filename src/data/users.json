@@ -1,0 +1,13 @@
+[
+  {
+    "id": "test-user-1",
+    "name": "Test User",
+    "email": "test@example.com",
+    "authProvider": "credentials",
+    "passwordHash": "test-password-hash",
+    "savedPropertyIds": [
+      "test-property-1"
+    ],
+    "createdAt": "2026-08-24T12:22:12.496Z"
+  }
+]

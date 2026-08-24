@@ -98,7 +98,7 @@ export default function ProfilePage() {
         This section will eventually display the Property objects that
         correspond to the property IDs saved by the current user.
 
-        For now, we display an empty state until the user's saved property
+        For now, I display an empty state until the user's saved property
         data is connected to the profile page.
       */}
       <section className="rounded-xl border bg-white p-6 shadow-sm">
