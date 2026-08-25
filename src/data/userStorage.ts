@@ -27,6 +27,14 @@ type StoredUser = {
   createdAt: string;
 };
 
+// Describes the information needed to find or create an application user
+type GetOrCreateUserInput = {
+  id: string;
+  name: string;
+  email: string;
+  authProvider: AuthProvider;
+  passwordHash?: string;
+};
 
 // Build the absolute path to the users.json file
 const usersFilePath = path.join(process.cwd(), "src", "data", "users.json");
@@ -138,4 +146,44 @@ export async function loadUsers(): Promise<User[]> {
   const users = storedUsers.map((storedUser) => toUser(storedUser));
 
   return users;
+}
+
+// Find a persisted user by their email address
+export async function findUserByEmail(email: string): Promise<User | undefined> {
+  // Load the persisted user records as User domain objects
+  const users = await loadUsers();
+
+  // Return the User whose email matches the supplied email address
+  return users.find((user) => user.email.toLowerCase() === email.toLowerCase());
+}
+
+// Find an existing persisted user or create and save a new one
+export async function getOrCreateUser({
+  id,
+  name,
+  email,
+  authProvider,
+  passwordHash,
+}: GetOrCreateUserInput): Promise<User> {
+  // Check whether this authenticated user already exists in storage
+  const existingUser = await findUserByEmail(email);
+
+  // If the user already exists, return their existing User domain object
+  if (existingUser) {
+    return existingUser;
+  }
+
+  // Otherwise create a new User domain object for this authenticated user
+  const newUser = new User({
+    id,
+    name,
+    email,
+    authProvider,
+    passwordHash,
+  });
+
+  // Persist the new user's data to users.json
+  await saveUser(newUser);
+
+  return newUser;
 }
