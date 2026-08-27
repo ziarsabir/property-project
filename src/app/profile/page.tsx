@@ -2,11 +2,74 @@
 
 // useSession gives this page access to the currently authenticated user's session
 import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react"; 
 import Link from "next/link";
+import ListingCard, { ListingCardSkeleton } from "@/components/ListingCard";
+import type { Listing } from "@/data/listings"; 
+import { Property } from "@/models/Property"; 
 
 export default function ProfilePage() {
   // Get the current user's session data and authentication status
   const { data: session, status } = useSession();
+  // Store the actual Property objects belonging to the authenticated user's saved properties 
+  const [savedProperties, setSavedProperties] = useState<Property[]>([])
+  // Track whether the saved property data is currently being loaded 
+  const [savedPropertiesLoading, setSavedPropertiesLoading] = useState(true); 
+
+  // Load the authenticated user's persisted saved property IDs 
+  useEffect(() => {
+    // Only request saved property data once the user is authenticated 
+    if (status !== "authenticated") {
+      return; 
+    }
+
+    async function loadSavedProperties() {
+      try {
+        // Request both my saved property IDs and all the available property listings 
+        const [savedRes, listingRes] = await Promise.all([
+          fetch("/api/saved"), 
+          fetch("/api/listings"), 
+        ]); 
+
+        // Convert both JSON responses into JavaScript data 
+        const savedData = await savedRes.json(); 
+        const listingData: unknown = await listingRes.json(); 
+
+        // Stop if either API request was unsuccessful
+        if (!savedRes.ok || !listingRes.ok) {
+          setSavedProperties([]); 
+          return; 
+        }
+
+        // Defensive programming - ensure the listings API returned an array
+        if (!Array.isArray(listingData)) {
+          setSavedProperties([]); 
+          return; 
+        }
+
+        const rawListings = listingData as Listing[]; 
+
+        // Convert the raw Listing objects into richer Property domain objects 
+        const properties = rawListings.map((listing) => 
+          Property.fromListing(listing)
+        ); 
+
+        // Keep only the Property objects whose IDs belong to this user's saved properties 
+        const matchingSavedProperties = properties.filter((property) =>
+          savedData.savedPropertyIds.includes(property.id)
+        ); 
+
+        // Store the user's actual saved Property objects in React state 
+        setSavedProperties(matchingSavedProperties); 
+
+      } finally {
+        // Stop the loading state once the request has finished 
+        setSavedPropertiesLoading(false); 
+      }
+    }
+
+    loadSavedProperties(); 
+  }, [status]); 
 
   // Show a temporary loading state while NextAuth checks the user's session
   if (status === "loading") {
@@ -95,11 +158,11 @@ export default function ProfilePage() {
       {/*
         SAVED PROPERTIES
 
-        This section will eventually display the Property objects that
-        correspond to the property IDs saved by the current user.
+        This section displays the Property objects that correspond
+        to the property IDs saved by the current user.
 
-        For now, I display an empty state until the user's saved property
-        data is connected to the profile page.
+        The saved property IDs are retrieved from the user's persisted
+        account data and matched against the available property listings.
       */}
       <section className="rounded-xl border bg-white p-6 shadow-sm">
         <div className="border-b pb-4">
@@ -112,74 +175,50 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        {/* Empty state shown when the user has no saved properties */}
-        <div className="py-10 text-center">
-          <div className="text-3xl" aria-hidden="true">
-            ♡
+        {/* Show a loading state while the user's saved properties are being retrieved */}
+        {savedPropertiesLoading ? (
+          <div className="grid gap-3 pt-6">
+            <ListingCardSkeleton />
           </div>
-
-          <h3 className="mt-3 text-base font-semibold text-slate-900">
-            No saved properties yet
-          </h3>
-
-          <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-            Save properties that catch your eye and they&apos;ll appear here for
-            easy access later.
-          </p>
-
-          <Link
-            href="/search"
-            className="mt-5 inline-flex rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
-          >
-            Start searching
-          </Link>
-        </div>
-      </section>
-
-      {/*
-        YOUR ENQUIRIES
-
-        This section will eventually display property enquiries made by
-        the authenticated user.
-
-        The contact route currently sends enquiries through Resend but
-        does not persist enquiry history, so for now this section displays
-        an empty state rather than temporary or hard-coded enquiry data.
-      */}
-      <section className="rounded-xl border bg-white p-6 shadow-sm">
-        <div className="border-b pb-4">
-          <h2 className="text-xl font-semibold text-slate-900">
-            Your enquiries
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Keep track of the properties you&apos;ve enquired about.
-          </p>
-        </div>
-
-        {/* Empty state shown when there is no persisted enquiry history */}
-        <div className="py-10 text-center">
-          <div className="text-3xl" aria-hidden="true">
-            ✉
+        ) : savedProperties.length > 0 ? (
+          // Display the actual Property objects saved by the authenticated user
+          <div className="grid gap-3 pt-6 sm:grid-cols-2">
+            {savedProperties.map((property) => (
+              <ListingCard
+                key={property.id}
+                l={property}
+              />
+            ))}
           </div>
+        ) : (
+          // Empty state shown when the user has no saved properties
+          <div className="py-10 text-center">
+            <div className="text-3xl" aria-hidden="true">
+              ♡
+            </div>
 
-          <h3 className="mt-3 text-base font-semibold text-slate-900">
-            No enquiries yet
-          </h3>
+            <h3 className="mt-3 text-base font-semibold text-slate-900">
+              No saved properties yet
+            </h3>
 
-          <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-            When you enquire about a property, your enquiry history can appear
-            here for easy access.
-          </p>
+            <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+              Save properties that catch your eye and they&apos;ll appear here
+              for easy access later.
+            </p>
 
-          <Link
-            href="/search"
-            className="mt-5 inline-flex rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
-          >
-            Search properties
-          </Link>
-        </div>
+            <Link
+              href="/search"
+              className="mt-5 inline-flex rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+            >
+              Start searching
+            </Link>
+          </div>
+        )}
       </section>
     </div>
-  );
+  ); 
 }
+
+
+
+    

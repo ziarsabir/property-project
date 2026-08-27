@@ -5,7 +5,10 @@
     "email": "test@example.com",
     "authProvider": "credentials",
     "passwordHash": "$2b$12$h1VGIXOtUwS5Kc91qGRiX.WxrxLq7LZYOCxfE9wGhwQEBuaeJt4OW",
-    "savedPropertyIds": [],
+    "savedPropertyIds": [
+      "l1",
+      "l3"
+    ],
     "createdAt": "2026-08-25T13:00:03.813Z"
   },
   {
@@ -13,7 +16,10 @@
     "name": "Ziar",
     "email": "ziar.sabir@googlemail.com",
     "authProvider": "google",
-    "savedPropertyIds": [],
+    "savedPropertyIds": [
+      "l1",
+      "l2"
+    ],
     "createdAt": "2026-08-25T13:14:27.628Z"
   }
 ]
