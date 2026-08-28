@@ -6,6 +6,9 @@ import { fmtGBP } from "@/lib/format";
 
 type ListingCardProps = {
   l: Property;
+
+  // Allow the same ListingCard component to have a normal or compact layout
+  variant?: "default" | "compact";
 };
 
 export function ListingCardSkeleton() {
@@ -24,8 +27,14 @@ export function ListingCardSkeleton() {
   );
 }
 
-export default function ListingCard({ l }: ListingCardProps) {
+export default function ListingCard({
+  l,
+  variant = "default",
+}: ListingCardProps) {
   const href = `/listing/${l.id}`;
+
+  // The compact variant is used on pages where smaller property cards are more suitable
+  const isCompact = variant === "compact";
 
   return (
     <Link
@@ -34,14 +43,22 @@ export default function ListingCard({ l }: ListingCardProps) {
       aria-label={`View details for ${l.title}`}
     >
       {/* IMAGE */}
-      <div className="relative w-full aspect-[4/3] overflow-hidden bg-slate-200">
+      <div
+        className={`relative w-full overflow-hidden bg-slate-200 ${
+          isCompact ? "aspect-[16/9]" : "aspect-[4/3]"
+        }`}
+      >
         {l.photo ? (
           <Image
             src={l.photo}
             alt={l.title}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1200px) 60vw, 520px"
+            sizes={
+              isCompact
+                ? "(max-width: 640px) 100vw, 300px"
+                : "(max-width: 640px) 100vw, (max-width: 1200px) 60vw, 520px"
+            }
             priority={false}
           />
         ) : (
@@ -51,8 +68,20 @@ export default function ListingCard({ l }: ListingCardProps) {
         )}
 
         {/* PRICE BADGE (always visible) */}
-        <div className="absolute left-3 top-3 z-10">
-          <span className="inline-flex items-center rounded-full bg-white/95 px-3 py-1 text-sm font-semibold text-slate-900 shadow">
+        <div
+          className={
+            isCompact
+              ? "absolute left-2 top-2 z-10"
+              : "absolute left-3 top-3 z-10"
+          }
+        >
+          <span
+            className={`inline-flex items-center rounded-full bg-white/95 font-semibold text-slate-900 shadow ${
+              isCompact
+                ? "px-2.5 py-1 text-xs"
+                : "px-3 py-1 text-sm"
+            }`}
+          >
             {fmtGBP(l.price)}
             {l.listingType === "RENT" ? " pcm" : ""}
           </span>
@@ -61,13 +90,32 @@ export default function ListingCard({ l }: ListingCardProps) {
         {/* HOVER OVERLAY (desktop) */}
         <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
           <div className="absolute inset-0 bg-black/35" />
-          <div className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-2">
-            <span className="inline-flex items-center rounded-lg bg-white/95 px-3 py-2 text-sm font-semibold text-slate-900 shadow">
+
+          <div
+            className={`absolute flex items-center justify-between gap-2 ${
+              isCompact
+                ? "inset-x-2 bottom-2"
+                : "inset-x-3 bottom-3"
+            }`}
+          >
+            <span
+              className={`inline-flex items-center rounded-lg bg-white/95 font-semibold text-slate-900 shadow ${
+                isCompact
+                  ? "px-2 py-1.5 text-xs"
+                  : "px-3 py-2 text-sm"
+              }`}
+            >
               {fmtGBP(l.price)}
               {l.listingType === "RENT" ? " pcm" : ""}
             </span>
 
-            <span className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm">
+            <span
+              className={`inline-flex items-center gap-2 rounded-lg bg-slate-900 font-semibold text-white shadow-sm ${
+                isCompact
+                  ? "px-3 py-1.5 text-xs"
+                  : "px-4 py-2 text-sm"
+              }`}
+            >
               View details <span aria-hidden>→</span>
             </span>
           </div>
@@ -75,20 +123,44 @@ export default function ListingCard({ l }: ListingCardProps) {
       </div>
 
       {/* CONTENT (tighter mobile spacing) */}
-      <div className="p-3 sm:p-4">
-        <p className="text-[11px] sm:text-xs text-slate-600">
+      <div className={isCompact ? "p-3" : "p-3 sm:p-4"}>
+        <p
+          className={
+            isCompact
+              ? "text-[11px] text-slate-600"
+              : "text-[11px] sm:text-xs text-slate-600"
+          }
+        >
           {l.city} • {l.postcode}
         </p>
 
-        <h3 className="mt-1 line-clamp-1 text-sm sm:text-base font-semibold text-slate-900">
+        <h3
+          className={
+            isCompact
+              ? "mt-1 line-clamp-1 text-sm font-semibold text-slate-900"
+              : "mt-1 line-clamp-1 text-sm sm:text-base font-semibold text-slate-900"
+          }
+        >
           {l.title}
         </h3>
 
-        <p className="mt-1 line-clamp-1 text-[11px] sm:text-xs text-slate-600">
+        <p
+          className={
+            isCompact
+              ? "mt-1 line-clamp-1 text-[11px] text-slate-600"
+              : "mt-1 line-clamp-1 text-[11px] sm:text-xs text-slate-600"
+          }
+        >
           {l.address}
         </p>
 
-        <p className="mt-2 text-[11px] sm:text-xs text-slate-700">
+        <p
+          className={
+            isCompact
+              ? "mt-2 text-[11px] text-slate-700"
+              : "mt-2 text-[11px] sm:text-xs text-slate-700"
+          }
+        >
           {l.beds} bed • {l.baths} bath •{" "}
           <span className="font-medium">{l.listingType}</span>
         </p>

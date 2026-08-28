@@ -105,3 +105,54 @@ export async function GET() {
     { status: 200 }
   );
 }
+
+// DELETE /api/saved - remove a saved property ID for the authenticated user
+export async function DELETE(req: Request) {
+  // Get the currently authenticated user's NextAuth session
+  const session = await getServerSession();
+
+  // Prevent an unauthenticated user from removing a saved property
+  if (!session?.user?.email) {
+    return NextResponse.json(
+      { ok: false, error: "You must be signed in to remove a saved property" },
+      { status: 401 }
+    );
+  }
+
+  // Read the JSON request body sent by the frontend
+  const body = await req.json();
+
+  // Extract the property ID that the user wants to remove
+  const { listingId } = body || {};
+
+  // Make sure a property ID was supplied
+  if (!listingId) {
+    return NextResponse.json(
+      { ok: false, error: "listingId is required" },
+      { status: 400 }
+    );
+  }
+
+  // Find my persisted User domain object using the email from the authenticated session
+  const user = await findUserByEmail(session.user.email);
+
+  // The authenticated user should already exist in my persistence layer
+  if (!user) {
+    return NextResponse.json(
+      { ok: false, error: "User account was not found" },
+      { status: 404 }
+    );
+  }
+
+  // Remove the property ID from the User object's saved properties
+  user.removeSavedProperty(listingId);
+
+  // Persist the User object's updated state back to users.json
+  await updateUser(user);
+
+  // Return a successful response containing the property ID that was removed
+  return NextResponse.json(
+    { ok: true, removed: { listingId } },
+    { status: 200 }
+  );
+}

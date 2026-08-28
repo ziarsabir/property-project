@@ -71,6 +71,34 @@ export default function ProfilePage() {
     loadSavedProperties(); 
   }, [status]); 
 
+  // Remove a property from the authenticated user's saved properties
+  async function handleRemoveSavedProperty(listingId: string) {
+    // Send a DELETE request containing the ID of the property that should be removed
+    const res = await fetch("/api/saved", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ listingId }),
+    });
+
+    // Convert the JSON response from the backend into JavaScript data
+    const data = await res.json();
+
+    // Stop if the backend was unable to remove the saved property
+    if (!res.ok) {
+      console.error(data?.error || "Unable to remove saved property");
+      return;
+    }
+
+    // Remove the deleted property from React state so its card disappears immediately
+    setSavedProperties((currentSavedProperties) =>
+      currentSavedProperties.filter(
+        (property) => property.id !== listingId
+      )
+    );
+  }
+
   // Show a temporary loading state while NextAuth checks the user's session
   if (status === "loading") {
     return (
@@ -182,12 +210,29 @@ export default function ProfilePage() {
           </div>
         ) : savedProperties.length > 0 ? (
           // Display the actual Property objects saved by the authenticated user
-          <div className="grid gap-3 pt-6 sm:grid-cols-2">
+          // Automatically fit as many compact property cards beside each other as the available space allows
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4 pt-6">
             {savedProperties.map((property) => (
-              <ListingCard
+              // Group the property card and its remove button together
+              <div
                 key={property.id}
-                l={property}
-              />
+                className="w-full space-y-2"
+              >
+                {/* Use the smaller compact card layout on the profile page */}
+                <ListingCard
+                  l={property}
+                  variant="compact"
+                />
+
+                {/* Remove this property from the authenticated user's saved properties */}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveSavedProperty(property.id)}
+                  className="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100"
+                >
+                  Remove saved property
+                </button>
+              </div>
             ))}
           </div>
         ) : (
@@ -218,7 +263,3 @@ export default function ProfilePage() {
     </div>
   ); 
 }
-
-
-
-    

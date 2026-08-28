@@ -6,8 +6,9 @@
     "authProvider": "credentials",
     "passwordHash": "$2b$12$h1VGIXOtUwS5Kc91qGRiX.WxrxLq7LZYOCxfE9wGhwQEBuaeJt4OW",
     "savedPropertyIds": [
-      "l1",
-      "l3"
+      "l4",
+      "l3",
+      "l8"
     ],
     "createdAt": "2026-08-25T13:00:03.813Z"
   },
