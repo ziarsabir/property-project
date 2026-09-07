@@ -31,7 +31,7 @@ export default function ListingCard({
   l,
   variant = "default",
 }: ListingCardProps) {
-  const href = `/listing/${l.id}`;
+  const href = `/listings/${l.id}`;
 
   // The compact variant is used on pages where smaller property cards are more suitable
   const isCompact = variant === "compact";
