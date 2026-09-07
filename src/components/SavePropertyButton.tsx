@@ -16,7 +16,7 @@ export default function SavePropertyButton({ listingId }: { listingId: string })
         setLoading(true); 
         // using TRY/FINALLY so loading always turns off even if something goes wrong
         try {
-            const res = await fetch("/api/saved", {
+            const res = await fetch("/api/saved-properties", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ listingId }),

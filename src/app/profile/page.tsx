@@ -27,7 +27,7 @@ export default function ProfilePage() {
       try {
         // Request both my saved property IDs and all the available property listings 
         const [savedRes, listingRes] = await Promise.all([
-          fetch("/api/saved"), 
+          fetch("/api/saved-properties"), 
           fetch("/api/listings"), 
         ]); 
 
@@ -74,7 +74,7 @@ export default function ProfilePage() {
   // Remove a property from the authenticated user's saved properties
   async function handleRemoveSavedProperty(listingId: string) {
     // Send a DELETE request containing the ID of the property that should be removed
-    const res = await fetch("/api/saved", {
+    const res = await fetch("/api/saved-properties", {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

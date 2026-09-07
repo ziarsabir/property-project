@@ -1,4 +1,4 @@
-// POST /api/saved - 
+// POST /api/saved-properties
 
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
 
 }
 
-// GET /api/saved - return the saved property IDs for the authenticated user
+// GET /api/saved-properties - return the saved property IDs for the authenticated user
 export async function GET() {
   // Get the currently authenticated user's NextAuth session
   const session = await getServerSession();
@@ -106,7 +106,7 @@ export async function GET() {
   );
 }
 
-// DELETE /api/saved - remove a saved property ID for the authenticated user
+// DELETE /api/saved-properties - remove a saved property ID for the authenticated user
 export async function DELETE(req: Request) {
   // Get the currently authenticated user's NextAuth session
   const session = await getServerSession();
