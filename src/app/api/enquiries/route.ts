@@ -1,3 +1,5 @@
+// POST (create) a new enquiry in the enquiries resource. 
+
 export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
