@@ -5,8 +5,7 @@ import ListingCard, { ListingCardSkeleton } from "@/components/ListingCard";
 import SearchFilters, { type FilterState } from "@/components/SearchFilters";
 import type { Listing } from "@/data/listings";
 import { Property } from "@/models/Property";
-import MapListings from "@/components/MapListings"; 
-
+import MapListings from "@/components/MapListings";
 
 function isAbortError(err: unknown) {
   if (err instanceof DOMException && err.name === "AbortError") return true;
@@ -65,7 +64,6 @@ export default function SearchPage() {
         );
 
         setProperties(propertyObjects);
-
       } catch (err: unknown) {
         if (isAbortError(err)) return;
 
@@ -90,7 +88,7 @@ export default function SearchPage() {
           )
             .toLowerCase()
             .includes(q.toLowerCase())
-      : true;
+        : true;
 
       const matchType = filters.listingType
         ? property.listingType === filters.listingType
@@ -123,7 +121,7 @@ export default function SearchPage() {
     });
   }, [properties, q, filters]);
 
- const visibleProperties = filtered;
+  const visibleProperties = filtered;
 
   return (
     <div className="grid gap-6 md:grid-cols-[1fr_420px] lg:grid-cols-[1fr_520px]">
@@ -164,15 +162,13 @@ export default function SearchPage() {
             </div>
           )}
         </div>
-        
-        <aside className="lg:sticky lg:top-6 h-fit">
-          <div className="border rounded-lg bg-slate-50 overflow-hidden h-[520px] lg:h-[calc(100vh-140px)]">
-            <MapListings listings={visibleProperties} />
-          </div>
-        </aside>
-
       </section>
 
+      <aside className="lg:sticky lg:top-6 h-fit">
+        <div className="border rounded-lg bg-slate-50 overflow-hidden h-[520px] lg:h-[calc(100vh-140px)]">
+          <MapListings listings={visibleProperties} />
+        </div>
+      </aside>
     </div>
   );
 }

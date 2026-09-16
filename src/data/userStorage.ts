@@ -1,6 +1,4 @@
-// Both functions coming from Node's promise-based file-system API 
-import { readFile, writeFile } from "fs/promises";
-import path from "path";
+import { usersContainer } from "@/lib/cosmos";
 import { User, type AuthProvider } from "@/models/User";
 
 /**
@@ -10,13 +8,12 @@ import { User, type AuthProvider } from "@/models/User";
  * while this file is responsible for reading and writing that user data
  * to storage.
  *
- * For now, users are stored in a local JSON file.
- * Later, this storage layer can be replaced with a real database.
+ * Users are now stored in the Azure Cosmos DB users container.
  */
 
 // Represents the shape of a user as it exists in storage.
 // Unlike the User domain object, this contains data only and has no User methods.
-// createdAt is stored as a string because JSON cannot preserve a JavaScript Date object.
+// createdAt is stored as a string because the database stores plain data rather than a JavaScript Date object.
 type StoredUser = {
   id: string;
   name: string;
@@ -36,11 +33,8 @@ type GetOrCreateUserInput = {
   passwordHash?: string;
 };
 
-// Build the absolute path to the users.json file
-const usersFilePath = path.join(process.cwd(), "src", "data", "users.json");
-
 // Convert a User domain object into a plain StoredUser record
-// that can later be serialized and saved to users.json.
+// that can later be saved to Cosmos DB.
 function toStoredUser(user: User): StoredUser {
   return {
     id: user.id,
@@ -50,7 +44,7 @@ function toStoredUser(user: User): StoredUser {
     passwordHash: user.passwordHash,
     savedPropertyIds: user.savedPropertyIds,
 
-    // Convert the JavaScript Date object into a string that can be stored as JSON
+    // Convert the JavaScript Date object into a string that can be stored as plain data
     createdAt: user.createdAt.toISOString(),
   };
 }
@@ -71,35 +65,34 @@ function toUser(storedUser: StoredUser): User {
   });
 }
 
-// Read the persisted users from users.json
-// This function is asynchronous because readFile() returns a Promise.
-// async allows me to use await to wait for the file-reading operation to complete. In the meantime Node can continue handling other work. 
+// Read the persisted users from the Cosmos DB users container
+// This function is asynchronous because querying Cosmos DB returns a Promise.
+// async allows me to use await to wait for the database operation to complete. In the meantime Node can continue handling other work.
 // Promise<StoredUser[]> means this async function eventually returns an array of stored user records
 export async function readUsers(): Promise<StoredUser[]> {
-  // Read the contents of users.json as JSON-formatted text 
-  const fileContents = await readFile(usersFilePath, "utf-8");
-
-  // Convert the JSON text into JavaScript data - deserialization 
-  // Tell TypeScript that the parsed data should have the shape of an array of stored user records
-  const users = JSON.parse(fileContents) as StoredUser[]; 
+  // Query all user records currently stored in the users container
+  const { resources: users } = await usersContainer.items
+    .query<StoredUser>({
+      query: "SELECT * FROM c",
+    })
+    .fetchAll();
 
   return users;
 }
 
-// Persist an array of user records to users.json
+// Persist an array of user records to the Cosmos DB users container
 // Promise<void> means this async function eventually finishes without returning a value
 export async function writeUsers(users: StoredUser[]): Promise<void> {
-  // Convert the JavaScript user data into JSON-formatted text - serialization
-  // null, 2 makes the resulting JSON nicely formatted and indented 
-  const json = JSON.stringify(users, null, 2);
-
-  // Write the serialized JSON data to users.json
-  await writeFile(usersFilePath, json, "utf-8");
+  // Upsert each user record into Cosmos DB.
+  // Upsert creates the record if it does not exist or replaces it if it already exists.
+  await Promise.all(
+    users.map((user) => usersContainer.items.upsert(user))
+  );
 }
 
 // Save a User domain object to persistent storage
 export async function saveUser(user: User): Promise<void> {
-  // Read the users that are already stored in users.json
+  // Read the users that are already stored in Cosmos DB
   const users = await readUsers();
 
   // Convert the User domain object into a plain record that can be stored
@@ -108,13 +101,13 @@ export async function saveUser(user: User): Promise<void> {
   // Add the new stored user record to the existing users array
   users.push(storedUser);
 
-  // Persist the updated users array back to users.json
+  // Persist the updated users array back to Cosmos DB
   await writeUsers(users);
 }
 
 // Update an existing User in persistent storage
 export async function updateUser(user: User): Promise<void> {
-  // Read the user records that are currently stored in users.json
+  // Read the user records that are currently stored in Cosmos DB
   const users = await readUsers();
 
   // Find the position of the stored user with the same ID
@@ -133,13 +126,13 @@ export async function updateUser(user: User): Promise<void> {
   // Replace the old stored user record with the updated version
   users[userIndex] = updatedStoredUser;
 
-  // Persist the updated users array back to users.json
+  // Persist the updated users array back to Cosmos DB
   await writeUsers(users);
 }
 
 // Load the persisted user records and reconstruct them as User domain objects
 export async function loadUsers(): Promise<User[]> {
-  // Read and deserialize the stored user records from users.json
+  // Read the stored user records from Cosmos DB
   const storedUsers = await readUsers();
 
   // Convert every StoredUser record into a real User domain object
@@ -182,7 +175,7 @@ export async function getOrCreateUser({
     passwordHash,
   });
 
-  // Persist the new user's data to users.json
+  // Persist the new user's data to Cosmos DB
   await saveUser(newUser);
 
   return newUser;
