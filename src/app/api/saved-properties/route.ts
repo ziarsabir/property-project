@@ -2,26 +2,27 @@
 
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { findUserByEmail, updateUser } from "@/data/userStorage";
+import { CosmosUserRepository } from "@/repositories/CosmosUserRepository";
+import { UserService } from "@/services/UserService";
 
+// Create the Cosmos-specific implementation of the UserRepository interface
+const userRepository = new CosmosUserRepository();
 
-// Save a property ID 
+// Pass the repository into the service layer.
+// UserService depends on the UserRepository abstraction rather than directly on Cosmos DB.
+const userService = new UserService(userRepository);
+
+// Save a property ID
 export async function POST(req: Request) {
-
   // Get the currently authenticated user's NextAuth session
   const session = await getServerSession();
 
   // Prevent an unauthenticated user from saving a property
   if (!session?.user?.email) {
-
     return NextResponse.json(
-
       { ok: false, error: "You must be signed in to save a property" },
-
       { status: 401 }
-
     );
-
   }
 
   const body = await req.json();
@@ -29,47 +30,30 @@ export async function POST(req: Request) {
   const { listingId } = body || {};
 
   if (!listingId) {
-
     return NextResponse.json(
-
       { ok: false, error: "listingId is required" },
-
       { status: 400 }
-
     );
-
   }
 
-  // Find my persisted User domain object using the email from the authenticated session
-  const user = await findUserByEmail(session.user.email);
+  // Delegate the user lookup, domain behaviour and persistence to the service layer
+  const user = await userService.savePropertyForUser(
+    session.user.email,
+    listingId
+  );
 
   // The authenticated user should already exist in my persistence layer
   if (!user) {
-
     return NextResponse.json(
-
       { ok: false, error: "User account was not found" },
-
       { status: 404 }
-
     );
-
   }
 
-  // Add the property ID to the User object's saved properties
-  user.saveProperty(listingId);
-
-  // Persist the User object's updated state back to users.json
-  await updateUser(user);
-
   return NextResponse.json(
-
     { ok: true, received: { listingId } },
-
     { status: 200 }
-
   );
-
 }
 
 // GET /api/saved-properties - return the saved property IDs for the authenticated user
@@ -85,11 +69,13 @@ export async function GET() {
     );
   }
 
-  // Find my persisted User domain object using the email from the authenticated session
-  const user = await findUserByEmail(session.user.email);
+  // Delegate the user lookup to the service layer
+  const savedPropertyIds = await userService.getSavedPropertyIds(
+    session.user.email
+  );
 
   // The authenticated user should already exist in my persistence layer
-  if (!user) {
+  if (!savedPropertyIds) {
     return NextResponse.json(
       { ok: false, error: "User account was not found" },
       { status: 404 }
@@ -100,7 +86,7 @@ export async function GET() {
   return NextResponse.json(
     {
       ok: true,
-      savedPropertyIds: user.savedPropertyIds,
+      savedPropertyIds,
     },
     { status: 200 }
   );
@@ -133,8 +119,11 @@ export async function DELETE(req: Request) {
     );
   }
 
-  // Find my persisted User domain object using the email from the authenticated session
-  const user = await findUserByEmail(session.user.email);
+  // Delegate the user lookup, domain behaviour and persistence to the service layer
+  const user = await userService.removeSavedPropertyForUser(
+    session.user.email,
+    listingId
+  );
 
   // The authenticated user should already exist in my persistence layer
   if (!user) {
@@ -143,12 +132,6 @@ export async function DELETE(req: Request) {
       { status: 404 }
     );
   }
-
-  // Remove the property ID from the User object's saved properties
-  user.removeSavedProperty(listingId);
-
-  // Persist the User object's updated state back to users.json
-  await updateUser(user);
 
   // Return a successful response containing the property ID that was removed
   return NextResponse.json(

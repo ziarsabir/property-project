@@ -10,7 +10,8 @@
 import NextAuth from "next-auth";
 import { GoogleAuthProvider } from "@/lib/auth/GoogleAuthProvider";
 import { CredentialsAuthProvider } from "@/lib/auth/CredentialsAuthProvider";
-import { getOrCreateUser } from "@/data/userStorage";
+import { CosmosUserRepository } from "@/repositories/CosmosUserRepository";
+import { UserService } from "@/services/UserService";
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -42,6 +43,13 @@ const credentialsAuthProvider = new CredentialsAuthProvider(
   demoUserEmail,
   demoUserPasswordHash
 );
+
+// Create the Cosmos-specific implementation of the UserRepository interface
+const userRepository = new CosmosUserRepository();
+
+// Pass the repository into the service layer.
+// UserService depends on the UserRepository abstraction rather than directly on Cosmos DB.
+const userService = new UserService(userRepository);
 
 const handler = NextAuth({
   providers: [
@@ -77,8 +85,8 @@ const handler = NextAuth({
       const authProvider =
         account?.provider === "google" ? "google" : "credentials";
 
-      // Find the existing application user or create and persist a new one
-      await getOrCreateUser({
+      // Delegate the user lookup / creation logic to the service layer
+      await userService.getOrCreateUser({
         id: user.id,
         name: user.name,
         email: user.email,
