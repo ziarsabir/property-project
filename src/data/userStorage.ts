@@ -65,89 +65,47 @@ function toUser(storedUser: StoredUser): User {
   });
 }
 
-// Read the persisted users from the Cosmos DB users container
-// This function is asynchronous because querying Cosmos DB returns a Promise.
-// async allows me to use await to wait for the database operation to complete. In the meantime Node can continue handling other work.
-// Promise<StoredUser[]> means this async function eventually returns an array of stored user records
-export async function readUsers(): Promise<StoredUser[]> {
-  // Query all user records currently stored in the users container
-  const { resources: users } = await usersContainer.items
-    .query<StoredUser>({
-      query: "SELECT * FROM c",
-    })
-    .fetchAll();
 
-  return users;
-}
-
-// Persist an array of user records to the Cosmos DB users container
-// Promise<void> means this async function eventually finishes without returning a value
-export async function writeUsers(users: StoredUser[]): Promise<void> {
-  // Upsert each user record into Cosmos DB.
-  // Upsert creates the record if it does not exist or replaces it if it already exists.
-  await Promise.all(
-    users.map((user) => usersContainer.items.upsert(user))
-  );
-}
 
 // Save a User domain object to persistent storage
 export async function saveUser(user: User): Promise<void> {
-  // Read the users that are already stored in Cosmos DB
-  const users = await readUsers();
-
   // Convert the User domain object into a plain record that can be stored
   const storedUser = toStoredUser(user);
 
-  // Add the new stored user record to the existing users array
-  users.push(storedUser);
-
-  // Persist the updated users array back to Cosmos DB
-  await writeUsers(users);
+  // Create the user if they do not exist, or replace them if they already exist
+  await usersContainer.items.upsert(storedUser);
 }
 
 // Update an existing User in persistent storage
 export async function updateUser(user: User): Promise<void> {
-  // Read the user records that are currently stored in Cosmos DB
-  const users = await readUsers();
-
-  // Find the position of the stored user with the same ID
-  const userIndex = users.findIndex(
-    (storedUser) => storedUser.id === user.id
-  );
-
-  // Prevent an update if the user does not already exist in storage
-  if (userIndex === -1) {
-    throw new Error(`User with ID ${user.id} was not found.`);
-  }
-
   // Convert the updated User domain object into a plain StoredUser record
   const updatedStoredUser = toStoredUser(user);
 
-  // Replace the old stored user record with the updated version
-  users[userIndex] = updatedStoredUser;
-
-  // Persist the updated users array back to Cosmos DB
-  await writeUsers(users);
-}
-
-// Load the persisted user records and reconstruct them as User domain objects
-export async function loadUsers(): Promise<User[]> {
-  // Read the stored user records from Cosmos DB
-  const storedUsers = await readUsers();
-
-  // Convert every StoredUser record into a real User domain object
-  const users = storedUsers.map((storedUser) => toUser(storedUser));
-
-  return users;
+  // Find the specific user item using its ID and partition key, then replace it
+  await usersContainer
+    .item(user.id, user.id)
+    .replace(updatedStoredUser);
 }
 
 // Find a persisted user by their email address
 export async function findUserByEmail(email: string): Promise<User | undefined> {
-  // Load the persisted user records as User domain objects
-  const users = await loadUsers();
+  // Ask Cosmos DB to return the user whose email matches the supplied email address
+  const { resources: users } = await usersContainer.items
+    .query<StoredUser>({
+      query: "SELECT * FROM c WHERE LOWER(c.email) = @email",
+      parameters: [
+        {
+          name: "@email",
+          value: email.toLowerCase(),
+        },
+      ],
+    })
+    .fetchAll();
 
-  // Return the User whose email matches the supplied email address
-  return users.find((user) => user.email.toLowerCase() === email.toLowerCase());
+  // If a matching stored user exists, reconstruct it as a User domain object
+  const storedUser = users[0];
+
+  return storedUser ? toUser(storedUser) : undefined;
 }
 
 // Find an existing persisted user or create and save a new one
