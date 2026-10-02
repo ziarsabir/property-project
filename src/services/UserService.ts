@@ -1,5 +1,7 @@
 import { User, type AuthProvider } from "@/models/User";
 import { UserRepository } from "@/repositories/UserRepository";
+import { hash } from "bcryptjs";
+import { randomUUID } from "crypto";
 
 type GetOrCreateUserInput = {
   id: string;
@@ -7,6 +9,12 @@ type GetOrCreateUserInput = {
   email: string;
   authProvider: AuthProvider;
   passwordHash?: string;
+};
+
+type RegisterUserInput = {
+  name: string;
+  email: string;
+  password: string;
 };
 
 export class UserService {
@@ -102,5 +110,36 @@ export class UserService {
     await this.userRepository.updateUser(user);
 
     return user;
+  }
+
+  // Register a new credentials user
+  async registerUser({
+    name,
+    email,
+    password,
+  }: RegisterUserInput): Promise<User> {
+    // Check whether an account already exists with this email address
+    const existingUser = await this.userRepository.findUserByEmail(email);
+
+    if (existingUser) {
+      throw new Error("A user with this email already exists.");
+    }
+
+    // Hash the password before storing it
+    const passwordHash = await hash(password, 12);
+
+    // Create a new credentials User domain object
+    const newUser = new User({
+      id: randomUUID(),
+      name,
+      email: email.trim().toLowerCase(),
+      authProvider: "credentials",
+      passwordHash,
+    });
+
+    // Persist the new user through the repository
+    await this.userRepository.saveUser(newUser);
+
+    return newUser;
   }
 }

@@ -2,11 +2,12 @@
 
 import { FormEvent, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function SignInPage() {
   const { status, data } = useSession();
 
-  console.log(data); 
+  console.log(data);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -149,6 +150,16 @@ export default function SignInPage() {
                   : "Sign in with email"}
               </button>
             </form>
+
+            <p className="text-center text-sm text-slate-600">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/register"
+                className="font-medium text-slate-900 underline"
+              >
+                Create account
+              </Link>
+            </p>
           </>
         )}
       </div>

@@ -3,6 +3,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { AuthProvider } from "./AuthProvider";
+import { UserRepository } from "@/repositories/UserRepository";
 
 /**
  * Encapsulates the email/password authentication logic.
@@ -18,10 +19,8 @@ import { AuthProvider } from "./AuthProvider";
 export class CredentialsAuthProvider extends AuthProvider<
   ReturnType<typeof CredentialsProvider>
 > {
-  constructor(
-    private readonly demoUserEmail: string,
-    private readonly demoUserPasswordHash: string
-  ) {
+  // Depend on the UserRepository abstraction rather than directly on Cosmos DB
+  constructor(private readonly userRepository: UserRepository) {
     super();
   }
 
@@ -56,7 +55,15 @@ export class CredentialsAuthProvider extends AuthProvider<
           return null;
         }
 
-        if (email !== this.demoUserEmail.toLowerCase()) {
+        // Find the registered user through the repository
+        const user = await this.userRepository.findUserByEmail(email);
+
+        // Only credentials users with a stored password hash can sign in this way
+        if (
+          !user ||
+          user.authProvider !== "credentials" ||
+          !user.passwordHash
+        ) {
           return null;
         }
 
@@ -66,7 +73,7 @@ export class CredentialsAuthProvider extends AuthProvider<
          */
         const passwordMatches = await compare(
           password,
-          this.demoUserPasswordHash
+          user.passwordHash
         );
 
         if (!passwordMatches) {
@@ -78,9 +85,9 @@ export class CredentialsAuthProvider extends AuthProvider<
          * authentication succeeded.
          */
         return {
-          id: "demo-user-1",
-          name: "Demo User",
-          email: this.demoUserEmail,
+          id: user.id,
+          name: user.name,
+          email: user.email,
         };
       },
     });

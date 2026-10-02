@@ -17,9 +17,6 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const nextAuthSecret = process.env.NEXTAUTH_SECRET;
 
-const demoUserEmail = process.env.DEMO_USER_EMAIL;
-const demoUserPasswordHash = process.env.DEMO_USER_PASSWORD_HASH;
-
 if (!googleClientId || !googleClientSecret) {
   throw new Error("Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET");
 }
@@ -28,28 +25,23 @@ if (!nextAuthSecret) {
   throw new Error("Missing NEXTAUTH_SECRET");
 }
 
-if (!demoUserEmail || !demoUserPasswordHash) {
-  throw new Error(
-    "Missing DEMO_USER_EMAIL or DEMO_USER_PASSWORD_HASH"
-  );
-}
-
-const googleAuthProvider = new GoogleAuthProvider(
-  googleClientId,
-  googleClientSecret
-);
-
-const credentialsAuthProvider = new CredentialsAuthProvider(
-  demoUserEmail,
-  demoUserPasswordHash
-);
-
 // Create the Cosmos-specific implementation of the UserRepository interface
 const userRepository = new CosmosUserRepository();
 
 // Pass the repository into the service layer.
 // UserService depends on the UserRepository abstraction rather than directly on Cosmos DB.
 const userService = new UserService(userRepository);
+
+const googleAuthProvider = new GoogleAuthProvider(
+  googleClientId,
+  googleClientSecret
+);
+
+// Pass the repository into the credentials provider so it can
+// find registered users and validate their stored password hashes.
+const credentialsAuthProvider = new CredentialsAuthProvider(
+  userRepository
+);
 
 const handler = NextAuth({
   providers: [
@@ -72,8 +64,7 @@ const handler = NextAuth({
      * Runs when a user signs in successfully.
      *
      * This connects NextAuth authentication to my user persistence layer.
-     * If the authenticated user does not already exist in storage,
-     * a new User record is created and saved.
+     * Google users are created in storage on their first successful sign-in.
      */
     async signIn({ user, account }) {
       // I need both an email and name to create a persisted application user
@@ -85,20 +76,15 @@ const handler = NextAuth({
       const authProvider =
         account?.provider === "google" ? "google" : "credentials";
 
-      // Delegate the user lookup / creation logic to the service layer
-      await userService.getOrCreateUser({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        authProvider,
-
-        // A credentials user requires the existing hashed demo password.
-        // A Google user does not need a password hash because Google handles authentication.
-        passwordHash:
-          authProvider === "credentials"
-            ? demoUserPasswordHash
-            : undefined,
-      });
+      // Google users may need an application user record created on their first sign-in
+      if (authProvider === "google") {
+        await userService.getOrCreateUser({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          authProvider,
+        });
+      }
 
       // Allow NextAuth to complete the successful sign-in
       return true;
