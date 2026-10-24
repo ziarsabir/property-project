@@ -40,8 +40,12 @@ export async function GET(
     // Download the actual image file into memory
     const imageBuffer = await blobClient.downloadToBuffer();
 
+    // Convert the Node.js Buffer into a Uint8Array,
+    // which can safely be passed to the standard Response API
+    const imageBytes = new Uint8Array(imageBuffer);
+
     // Return the image bytes to the browser
-    return new Response(imageBuffer, {
+    return new Response(imageBytes, {
       headers: {
         "Content-Type":
           properties.contentType || "application/octet-stream",
