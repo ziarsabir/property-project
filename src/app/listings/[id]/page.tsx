@@ -45,7 +45,7 @@ export default async function ListingPage({
           {l.listingType === "RENT" ? " pcm" : ""}
         </div>
 
-        {/* Save button (Client Component) - sends this listing's id to /api/saved */}
+        {/* Save button (Client Component) - sends this listing's id to /api/saved-properties */}
         <div className="mt-4">
           <SavePropertyButton listingId={l.id}/>
         </div>

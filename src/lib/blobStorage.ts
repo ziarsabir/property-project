@@ -1,6 +1,6 @@
 /**
  * This file sets up the connection between my Homefinder backend
- * and Azure Blob Storage, and provides access to the container
+ * and Azure Blob Storage, and provides access to the containers
  * where the Nest property data files are stored.
  */
 
@@ -9,6 +9,7 @@ import { BlobServiceClient } from "@azure/storage-blob";
 // Read my Azure Blob Storage settings from environment variables
 const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
 const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME;
+const imageContainerName = process.env.AZURE_STORAGE_IMAGE_CONTAINER_NAME;
 
 // Stop the app with a clear error if the Azure connection string is missing
 if (!connectionString) {
@@ -20,6 +21,10 @@ if (!containerName) {
   throw new Error("Missing AZURE_STORAGE_CONTAINER_NAME");
 }
 
+if (!imageContainerName) {
+  throw new Error("Missing AZURE_STORAGE_IMAGE_CONTAINER_NAME");
+}
+
 // Create a client that connects my backend to the Azure Storage Account
 const blobServiceClient =
   BlobServiceClient.fromConnectionString(connectionString);
@@ -27,3 +32,7 @@ const blobServiceClient =
 // Create a client for the specific container that stores my Nest property data
 export const propertyDataContainer =
   blobServiceClient.getContainerClient(containerName);
+
+// Create a client for the container that stores the Nest property images 
+export const propertyImagesContainer = 
+  blobServiceClient.getContainerClient(imageContainerName); 
