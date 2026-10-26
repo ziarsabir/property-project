@@ -22,7 +22,7 @@ type PropertyConstructor = {
   listingType: ListingType;
   beds: number;
   baths: number;
-  city: string;
+  town: string;
   postcode: string;
   address: string;
   lat: number;
@@ -39,7 +39,7 @@ export class Property {
   listingType: ListingType;
   beds: number;
   baths: number;
-  city: string;
+  town: string;
   postcode: string;
   address: string;
   lat: number;
@@ -56,7 +56,7 @@ export class Property {
     listingType,
     beds,
     baths,
-    city,
+    town,
     postcode,
     address,
     lat,
@@ -84,7 +84,7 @@ export class Property {
     this.listingType = listingType;
     this.beds = beds;
     this.baths = baths;
-    this.city = city;
+    this.town = town;
     this.postcode = postcode;
     this.address = address;
     this.lat = lat;

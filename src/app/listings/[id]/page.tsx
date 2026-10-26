@@ -51,7 +51,7 @@ export default async function ListingPage({
         </div>
 
         <div className="mt-2 text-sm text-slate-700">
-          {l.beds} bed • {l.baths} bath • {l.city} {l.postcode}
+          {l.beds} bed • {l.baths} bath • {l.town} {l.postcode}
         </div>
       </section>
 

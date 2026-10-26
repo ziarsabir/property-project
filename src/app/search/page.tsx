@@ -80,7 +80,7 @@ export default function SearchPage() {
     return properties.filter((property) => {
       const matchQ = q
         ? (
-            property.city +
+            property.town +
             " " +
             property.postcode +
             " " +
@@ -128,7 +128,7 @@ export default function SearchPage() {
       <section className="space-y-3">
         <input
           className="border rounded px-3 py-2 w-full"
-          placeholder="City, postcode, keyword"
+          placeholder="Town, postcode, keyword"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />

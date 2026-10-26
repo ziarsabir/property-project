@@ -131,7 +131,7 @@ export default function ListingCard({
               : "text-[11px] sm:text-xs text-slate-600"
           }
         >
-          {l.city} • {l.postcode}
+          {l.town} • {l.postcode}
         </p>
 
         <h3

@@ -6,7 +6,7 @@ export type Listing = {
   listingType: "SALE" | "RENT";
   beds: number;
   baths: number;
-  city: string;
+  town: string;
   postcode: string;
   address: string;
   lat: number;
@@ -23,7 +23,7 @@ export const listings: Listing[] = [
     listingType: "SALE",
     beds: 1,
     baths: 1,
-    city: "London",
+    town: "London",
     postcode: "W2 2UH",
     address: "12 Bayswater Rd, London",
     lat: 51.5115,
@@ -39,7 +39,7 @@ export const listings: Listing[] = [
     listingType: "RENT",
     beds: 3,
     baths: 2,
-    city: "London",
+    town: "London",
     postcode: "SW11 1AA",
     address: "24 Lavender Hill, London",
     lat: 51.4647,
@@ -55,7 +55,7 @@ export const listings: Listing[] = [
     listingType: "SALE",
     beds: 2,
     baths: 1,
-    city: "Manchester",
+    town: "Manchester",
     postcode: "M1 1AE",
     address: "3 Piccadilly, Manchester",
     lat: 53.4794,
@@ -71,7 +71,7 @@ export const listings: Listing[] = [
     listingType: "SALE",
     beds: 4,
     baths: 3,
-    city: "Birmingham",
+    town: "Birmingham",
     postcode: "B15 3AA",
     address: "10 Edgbaston Rd, Birmingham",
     lat: 52.4534,
@@ -88,7 +88,7 @@ export const listings: Listing[] = [
     listingType: "RENT",
     beds: 2,
     baths: 2,
-    city: "Leeds",
+    town: "Leeds",
     postcode: "LS1 4AG",
     address: "22 Wellington St, Leeds",
     lat: 53.7974,
@@ -104,7 +104,7 @@ export const listings: Listing[] = [
     listingType: "SALE",
     beds: 1,
     baths: 1,
-    city: "Edinburgh",
+    town: "Edinburgh",
     postcode: "EH1 1QS",
     address: "7 High St, Edinburgh",
     lat: 55.9508,
@@ -121,7 +121,7 @@ export const listings: Listing[] = [
     listingType: "RENT",
     beds: 3,
     baths: 2,
-    city: "Liverpool",
+    town: "Liverpool",
     postcode: "L3 1BP",
     address: "45 The Strand, Liverpool",
     lat: 53.4034,
@@ -137,7 +137,7 @@ export const listings: Listing[] = [
     listingType: "SALE",
     beds: 2,
     baths: 2,
-    city: "Bristol",
+    town: "Bristol",
     postcode: "BS8 3AH",
     address: "14 Royal York Crescent, Bristol",
     lat: 51.4545,
