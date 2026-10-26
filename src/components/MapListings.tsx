@@ -115,7 +115,7 @@ export default function MapListings({
         .addTo(map);
 
       marker.getElement().addEventListener("click", () => {
-        window.location.href = `/listing/${property.id}`;
+        window.location.href = `/listings/${property.id}`;
       });
 
       markersRef.current.push(marker);
