@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import ListingCard, { ListingCardSkeleton } from "@/components/ListingCard";
 import SearchFilters, { type FilterState } from "@/components/SearchFilters";
-import type { Listing } from "@/data/listings";
+import type { Listing } from "@/types/listing";
 import { Property } from "@/models/Property";
 import MapListings from "@/components/MapListings";
 

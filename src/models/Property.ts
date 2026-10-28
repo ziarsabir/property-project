@@ -1,4 +1,4 @@
-import type { Listing } from "@/data/listings";
+import type { Listing } from "@/types/listing";
 
 /**
  * The Property class represents a property listing within the application.

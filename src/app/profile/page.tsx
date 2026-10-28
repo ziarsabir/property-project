@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react"; 
 import Link from "next/link";
 import ListingCard, { ListingCardSkeleton } from "@/components/ListingCard";
-import type { Listing } from "@/data/listings"; 
+import type { Listing } from "@/types/listing"; 
 import { Property } from "@/models/Property"; 
 
 export default function ProfilePage() {

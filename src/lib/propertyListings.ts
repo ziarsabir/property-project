@@ -1,5 +1,5 @@
 import { propertyDataContainer } from "@/lib/blobStorage";
-import type { Listing } from "@/data/listings";
+import type { Listing } from "@/types/listing";
 import * as XLSX from "xlsx";
 
 /**
