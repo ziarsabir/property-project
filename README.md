@@ -2,7 +2,7 @@
 
 Homefinder is a full-stack property search application built with Next.js, TypeScript and Tailwind CSS.
 
-Users can browse property listings, search using filters and an interactive map, view property details, submit enquiries and sign in using Google authentication.
+Users can browse property listings, search using filters and an interactive map, view property details, submit enquiries and sign in using Google or credentials authentication.
 
 ---
 
